@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | Room Reserve</title>
+  <link rel="stylesheet" href="style.css?v=ui-mobile-ar-final-2026" />
+</head>
+<body data-current-page="admin" data-protected-page="true">
+<header class="site-header">
+  <nav class="navbar">
+    <a href="index.html" class="brand"><img src="assets/logo.png" alt="Room Reserve Logo"><span>Room Reserve</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html" data-page="home">Home</a></li>
+      <li><a href="about.html" data-page="rooms">Explore Rooms</a></li>
+      <li><a href="booking.html" data-page="booking" data-protected-link class="customer-only">Booking</a></li>
+      <li><a href="bookings.html" data-page="bookings" data-protected-link class="customer-only">My Bookings</a></li>
+      <li><a href="profile.html" data-page="profile" data-protected-link class="customer-only">Profile</a></li>
+      <li><a href="admin.html" data-page="admin" class="admin-only">Admin Dashboard</a></li>
+    </ul>
+    <div class="auth-area">
+      <span class="user-chip" id="userChip"></span>
+      <a href="login.html" class="signin-link" id="signinLink">Sign In</a>
+      <button class="logout-btn" id="logoutBtn" type="button">Logout</button>
+    </div>
+  </nav>
+</header>
+
+<main class="section"><div class="section-inner">
+  <div class="section-head"><div><p class="eyebrow">Admin Panel</p><h1>Admin Dashboard</h1><p>Manage bookings, users, payment status, and reservation workflow.</p></div><a class="btn-primary" id="exportCsvBtn" href="#">Export CSV</a></div>
+  <div class="admin-stats" id="adminStats"></div>
+  <form class="admin-tools" id="adminFilters"><input id="adminQ" placeholder="Search reference, guest, phone, email, room..."><select id="adminStatus"><option value="all">All statuses</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="checked_in">Checked in</option><option value="checked_out">Checked out</option><option value="cancelled">Cancelled</option><option value="rejected">Rejected</option></select><input type="date" id="adminDateFrom"><input type="date" id="adminDateTo"><button class="btn-primary" type="submit">Filter</button></form>
+  <h2>Bookings</h2><div class="admin-grid" id="adminBookings"></div>
+  <h2 style="margin-top:34px">Users</h2><div class="admin-grid" id="adminUsers"></div>
+</div></main>
+<footer class="site-footer"><img src="assets/logo.png" alt="Room Reserve Logo"><p>© 2026 Room Reserve. Product-ready hotel booking system.</p></footer>
+<script src="script.js?v=ui-mobile-ar-final-2026"></script>
+</body>
+</html>

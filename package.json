@@ -1,0 +1,16 @@
+{
+  "name": "room-reserve-final-vercel",
+  "version": "4.0.0",
+  "private": true,
+  "description": "Room Reserve final Vercel deployment with a Node entrypoint, static public files, API, and PostgreSQL support.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": "20.x"
+  },
+  "dependencies": {
+    "pg": "^8.13.1"
+  }
+}

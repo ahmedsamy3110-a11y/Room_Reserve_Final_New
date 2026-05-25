@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Room Reserve | Hotel Booking</title>
+  <link rel="stylesheet" href="style.css?v=ui-mobile-ar-final-2026" />
+</head>
+<body data-current-page="home">
+<header class="site-header">
+  <nav class="navbar">
+    <a href="index.html" class="brand"><img src="assets/logo.png" alt="Room Reserve Logo"><span>Room Reserve</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html" data-page="home">Home</a></li>
+      <li><a href="about.html" data-page="rooms">Explore Rooms</a></li>
+      <li><a href="booking.html" data-page="booking" data-protected-link class="customer-only">Booking</a></li>
+      <li><a href="bookings.html" data-page="bookings" data-protected-link class="customer-only">My Bookings</a></li>
+      <li><a href="profile.html" data-page="profile" data-protected-link class="customer-only">Profile</a></li>
+      <li><a href="admin.html" data-page="admin" class="admin-only">Admin Dashboard</a></li>
+    </ul>
+    <div class="auth-area">
+      <span class="user-chip" id="userChip"></span>
+      <a href="login.html" class="signin-link" id="signinLink">Sign In</a>
+      <button class="logout-btn" id="logoutBtn" type="button">Logout</button>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-card">
+      <p class="eyebrow">Product Edition</p>
+      <h1>Book smart hotel rooms in Egypt.</h1>
+      <p>Room Reserve is a complete hotel booking system with user accounts, live room availability, customer bookings, admin dashboard, payment status, profile management, and export tools.</p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="about.html">Explore Rooms</a>
+        <a class="btn-soft customer-only" href="booking.html" data-protected-link>Start Booking</a>
+      </div>
+      <div class="stats">
+        <a class="stat" href="about.html"><strong>6+</strong><span>Room types</span></a>
+        <a class="stat" href="bookings.html" data-protected-link><strong>Safe</strong><span>Booking records</span></a>
+        <a class="stat admin-only" href="admin.html"><strong>Admin</strong><span>Control panel</span></a><a class="stat customer-only" href="profile.html" data-protected-link><strong>Profile</strong><span>Account tools</span></a>
+        <a class="stat" href="about.html"><strong>Live</strong><span>Availability</span></a>
+      </div>
+    </div>
+    <div class="hero-visual"><img src="assets/logo.png" alt="Room Reserve"></div>
+  </section>
+  <section class="section"><div class="section-inner">
+    <div class="section-head"><div><p class="eyebrow">Core Features</p><h2>Built like a real booking product.</h2></div></div>
+    <div class="grid-3">
+      <a class="card feature-card clickable-card" href="about.html"><div class="feature-icon">1</div><h3>Availability Control</h3><p>The system prevents duplicate bookings when a room is fully booked for the selected dates.</p><span class="card-link">Explore available rooms</span></a>
+      <a class="card feature-card clickable-card customer-only" href="profile.html" data-protected-link><div class="feature-icon">2</div><h3>Customer Profile</h3><p>Customers can manage their profile and change password securely.</p><span class="card-link">Open profile</span></a>
+      <a class="card feature-card clickable-card admin-only" href="admin.html"><div class="feature-icon">3</div><h3>Admin Management</h3><p>Admin can search, filter, confirm, cancel, check in, check out, and export bookings.</p><span class="card-link">Open dashboard</span></a>
+    </div>
+  </div></section>
+</main>
+<footer class="site-footer"><img src="assets/logo.png" alt="Room Reserve Logo"><p>© 2026 Room Reserve. Product-ready hotel booking system.</p></footer>
+<script src="script.js?v=ui-mobile-ar-final-2026"></script>
+</body>
+</html>

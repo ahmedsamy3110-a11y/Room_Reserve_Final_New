@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | Room Reserve</title>
+  <link rel="stylesheet" href="style.css?v=ui-mobile-ar-final-2026" />
+</head>
+<body data-current-page="login" class="login-body">
+<main class="auth-page"><section class="auth-card">
+  <a class="auth-logo" href="index.html"><img src="assets/logo.png" alt="Room Reserve"><span>Room Reserve</span></a>
+  <p class="eyebrow">Secure access</p><h1>Welcome back</h1><p>Create an account first, then login to book rooms.</p>
+  <div class="auth-tabs"><button class="auth-tab active" data-mode="login" type="button">Login</button><button class="auth-tab" data-mode="register" type="button">Register</button></div>
+  <form id="authForm">
+    <div class="form-group" id="nameGroup" style="display:none"><label>Full Name</label><input id="name" autocomplete="name" placeholder="Enter your full name"></div>
+    <div class="form-group"><label>Email</label><input id="email" type="email" required autocomplete="email" placeholder="example@gmail.com"></div>
+    <div class="form-group"><label>Password</label><div class="password-wrap"><input id="password" type="password" required autocomplete="current-password" placeholder="Strong@123"><button class="password-toggle" type="button" data-toggle-password="password" aria-label="Show password">👁</button></div></div>
+    <button class="btn-primary full-width" id="authSubmit" type="submit">Login</button>
+    <button class="btn-outline full-width" id="resetPasswordBtn" type="button" style="margin-top:10px">Reset Password</button>
+  </form>
+  <div class="message" id="authMessage"></div>
+  <div style="margin-top:16px;text-align:center"><a href="index.html" class="btn-outline">Back to Home</a></div>
+</section></main><script src="script.js?v=ui-mobile-ar-final-2026"></script></body></html>

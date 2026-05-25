@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Bookings | Room Reserve</title>
+  <link rel="stylesheet" href="style.css?v=ui-mobile-ar-final-2026" />
+</head>
+<body data-current-page="bookings" data-protected-page="true">
+<header class="site-header">
+  <nav class="navbar">
+    <a href="index.html" class="brand"><img src="assets/logo.png" alt="Room Reserve Logo"><span>Room Reserve</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html" data-page="home">Home</a></li>
+      <li><a href="about.html" data-page="rooms">Explore Rooms</a></li>
+      <li><a href="booking.html" data-page="booking" data-protected-link class="customer-only">Booking</a></li>
+      <li><a href="bookings.html" data-page="bookings" data-protected-link class="customer-only">My Bookings</a></li>
+      <li><a href="profile.html" data-page="profile" data-protected-link class="customer-only">Profile</a></li>
+      <li><a href="admin.html" data-page="admin" class="admin-only">Admin Dashboard</a></li>
+    </ul>
+    <div class="auth-area">
+      <span class="user-chip" id="userChip"></span>
+      <a href="login.html" class="signin-link" id="signinLink">Sign In</a>
+      <button class="logout-btn" id="logoutBtn" type="button">Logout</button>
+    </div>
+  </nav>
+</header>
+
+<main class="section"><div class="section-inner">
+  <div class="section-head"><div><p class="eyebrow">Customer Area</p><h1>My Bookings</h1><p>Only your own reservations are displayed here.</p></div><a class="btn-primary" href="booking.html">New Booking</a></div>
+  <div class="bookings-grid" id="myBookings"></div>
+</div></main>
+<footer class="site-footer"><img src="assets/logo.png" alt="Room Reserve Logo"><p>© 2026 Room Reserve. Product-ready hotel booking system.</p></footer>
+<script src="script.js?v=ui-mobile-ar-final-2026"></script>
+</body>
+</html>
