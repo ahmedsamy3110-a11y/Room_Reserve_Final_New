@@ -128,7 +128,7 @@ function applyLanguage(){
   const pairs = {
     'a[data-page="home"]':'Home','a[data-page="rooms"]':'Explore Rooms','a[data-page="booking"]':'Booking','a[data-page="bookings"]':'My Bookings','a[data-page="profile"]':'Profile','a[data-page="admin"]':'Admin Dashboard','#signinLink':'Sign In','#logoutBtn':'Logout',
     '#authSubmit': qs('#authSubmit')?.textContent?.includes('Create') ? 'Create Account' : 'Login','#resetPasswordBtn':'Reset Password',
-    '.booking-panel h2':'Booking Details','button[type="submit"].btn-primary.full-width':'Confirm Booking'
+    '.booking-panel h2':'Booking Details'
   };
   Object.entries(pairs).forEach(([sel,en])=>qsa(sel).forEach(el=>{ if(el && !el.dataset.lockedText) el.textContent=tr(en); }));
   // Exact text replacements for headings, labels, options and small UI text.
@@ -248,7 +248,15 @@ async function renderRoomsPage(){ const grid=qs('#roomsGrid'); if(!grid) return;
 async function renderBookingRooms(){ const list=qs('#bookingRooms'); if(!list) return; const params=queryParams('booking'); await loadRooms(params); list.innerHTML = state.rooms.map(r=>roomTemplate(r,true)).join('') || '<div class="card feature-card">No rooms found.</div>'; fillRoomSelect(); setupRoomClicks(); updateSummary(); }
 function fillRoomSelect(){ const sel=qs('#roomType'); if(!sel) return; const old=sel.value || state.selectedRoomId; sel.innerHTML=`<option value="">${tr('Select a room')}</option>` + state.rooms.map(r=>`<option value="${r.id}">${tRoom(r.name)} - ${formatCurrency(r.finalPrice)}</option>`).join(''); if(old) sel.value=old; }
 function calculateNights(a,b){ const s=new Date(a), e=new Date(b); if(isNaN(s)||isNaN(e)||e<=s) return 1; return Math.ceil((e-s)/(1000*60*60*24)); }
-function updateSummary(){ const sel=qs('#roomType'); const checkin=qs('#checkin'); const checkout=qs('#checkout'); if(!sel) return; const room=state.rooms.find(r=>r.id===sel.value); const nights=calculateNights(checkin?.value, checkout?.value); const price=room?room.finalPrice:0; const total=room ? price*nights + SERVICE_FEES : 0; qs('#nightsValue').textContent=nights; qs('#priceNightValue').textContent=formatCurrency(price); qs('#displayPrice').textContent=formatCurrency(total); qs('#availableUnitsValue').textContent = room ? room.availableUnits : '-'; if(sel.value){ state.selectedRoomId=sel.value; localStorage.setItem('selectedRoomId',sel.value); qsa('.room-card').forEach(c=>c.classList.toggle('selected',c.dataset.roomId===sel.value)); } }
+function updateBookingSubmitLabel(){
+  const form=qs('#bookingForm');
+  const btn=form?.querySelector('button[type="submit"]');
+  if(!btn || btn.dataset.lockedText==='true') return;
+  const loggedIn = Boolean(getToken() && getUser());
+  btn.textContent = loggedIn ? tr('Confirm Booking') : tr('Login');
+  btn.dataset.enText = loggedIn ? 'Confirm Booking' : 'Login';
+}
+function updateSummary(){ const sel=qs('#roomType'); const checkin=qs('#checkin'); const checkout=qs('#checkout'); if(!sel) return; const room=state.rooms.find(r=>r.id===sel.value); const nights=calculateNights(checkin?.value, checkout?.value); const price=room?room.finalPrice:0; const total=room ? price*nights + SERVICE_FEES : 0; qs('#nightsValue').textContent=nights; qs('#priceNightValue').textContent=formatCurrency(price); qs('#displayPrice').textContent=formatCurrency(total); qs('#availableUnitsValue').textContent = room ? room.availableUnits : '-'; if(sel.value){ state.selectedRoomId=sel.value; localStorage.setItem('selectedRoomId',sel.value); qsa('.room-card').forEach(c=>c.classList.toggle('selected',c.dataset.roomId===sel.value)); } updateBookingSubmitLabel(); }
 function applyBookingParams(){ if(page()!=='booking') return; const p=new URLSearchParams(location.search); if(p.get('room')) state.selectedRoomId=p.get('room'); }
 function normalizeEgyptPhoneClient(value){
   let p = String(value || '').trim().replace(/[\s().-]/g,'');
@@ -316,6 +324,10 @@ function setupForms(){
     const result = qs('#bookingResult');
     const submitBtn = form.querySelector('button[type="submit"]');
     if(form.dataset.locked === 'true' || window.__bookingSubmitting) return;
+    if(!getToken() || !getUser()){
+      location.href = `login.html?return=${encodeURIComponent('booking.html')}`;
+      return;
+    }
     if(getUser()?.role === 'admin') { showLocalizedMessage(result,'Admin accounts cannot create customer bookings. Use the Admin Dashboard to manage reservations.','error'); return; }
     const rawPhone = qs('#guestPhone').value;
     if(!isValidEgyptPhone(rawPhone)) { showLocalizedMessage(result,'Please enter a valid Egyptian mobile number. Example: 01012345678.','error'); qs('#guestPhone')?.focus(); return; }
@@ -333,7 +345,7 @@ function setupForms(){
       toast(tr('Booking saved successfully.'));
       await renderBookingRooms();
     }catch(err){
-      if(submitBtn){ submitBtn.disabled=false; submitBtn.textContent=tr('Confirm Booking'); }
+      if(submitBtn){ submitBtn.disabled=false; updateBookingSubmitLabel(); }
       showMessage(result,err.message,'error');
     }finally{
       window.__bookingSubmitting = false;
