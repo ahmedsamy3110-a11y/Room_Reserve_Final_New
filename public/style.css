@@ -249,3 +249,13 @@ button[disabled]{opacity:.65;cursor:not-allowed}
   .card-payment-fields{padding:10px}
   .booking-submit-area{position:static;padding-top:0;background:transparent}
 }
+
+
+/* Visible admin delete booking controls - v3 */
+.booking-head-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.admin-booking-card .delete-booking-btn{background:#dc2626!important;color:#fff!important;border:0!important;box-shadow:0 12px 22px rgba(220,38,38,.18)}
+.admin-booking-card .delete-booking-btn:hover{background:#b91c1c!important;transform:translateY(-1px)}
+.admin-actions-visible{border-top:1px solid var(--border);padding-top:14px;align-items:center;justify-content:flex-end}
+.delete-booking-wide{min-width:180px;font-size:15px;padding:13px 18px}
+.delete-booking-top{white-space:nowrap;padding:10px 14px}
+@media(max-width:720px){.booking-head-actions{width:100%;justify-content:flex-start}.delete-booking-top,.delete-booking-wide{width:100%;justify-content:center}.admin-actions-visible select{width:100%}}
