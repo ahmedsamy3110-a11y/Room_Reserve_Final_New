@@ -51,6 +51,41 @@ const initialRooms = [
     image: 'https://images.unsplash.com/photo-1602002418082-a4443e081dd1?auto=format&fit=crop&w=1200&q=80',
     amenities: ['Sea view', 'Smart lock', 'Lounge area', 'Breakfast included'],
     description: 'A sea-view suite designed for a luxury coastal hotel concept, combining relaxing beach views with smart access.'
+  },
+  {
+    id: 'luxor_heritage_suite', name: 'Luxor Heritage Suite', location: 'Luxor, Egypt', category: 'Heritage',
+    capacity: 2, beds: '1 King Bed', size: '46 m²', price: 3600, discount: 18, inventory: 3, status: 'available',
+    image: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?auto=format&fit=crop&w=1200&q=80',
+    amenities: ['Heritage design', 'Smart lock', 'Lounge area', 'Breakfast included'],
+    description: 'A heritage-style suite for a luxury Egypt hotel concept, combining classic design with smart access.'
+  },
+  {
+    id: 'sharm_family_suite', name: 'Sharm Family Suite', location: 'Sharm El Sheikh, Egypt', category: 'Family',
+    capacity: 4, beds: '1 King Bed + 2 Twin Beds', size: '64 m²', price: 4800, discount: 14, inventory: 3, status: 'available',
+    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80',
+    amenities: ['Family layout', 'Sea breeze', 'Kids corner', 'Breakfast included'],
+    description: 'A comfortable family suite with enough space for parents and children, designed for longer beach stays.'
+  },
+  {
+    id: 'giza_pyramid_view', name: 'Giza Pyramid View Room', location: 'Giza, Egypt', category: 'View',
+    capacity: 2, beds: '1 Queen Bed', size: '36 m²', price: 3100, discount: 10, inventory: 4, status: 'available',
+    image: 'https://images.unsplash.com/photo-1572252009286-268acec5ca0a?auto=format&fit=crop&w=1200&q=80',
+    amenities: ['Pyramid view', 'Smart TV', 'Work desk', 'Room service'],
+    description: 'A city hotel room with a premium view concept, suitable for tourists and short business stays.'
+  },
+  {
+    id: 'six_guest_grand_family', name: 'Grand Family Room for 6', location: 'North Coast, Egypt', category: 'Family',
+    capacity: 6, beds: '2 Queen Beds + 2 Single Beds', size: '88 m²', price: 6500, discount: 16, inventory: 2, status: 'available',
+    image: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=1200&q=80',
+    amenities: ['Sleeps 6 guests', 'Large lounge', '2 bathrooms', 'Kitchenette'],
+    description: 'A large family room built for groups up to six guests, with more space and practical sleeping arrangements.'
+  },
+  {
+    id: 'business_king_room', name: 'Business King Room', location: 'New Administrative Capital, Egypt', category: 'Business',
+    capacity: 2, beds: '1 King Bed', size: '30 m²', price: 2600, discount: 8, inventory: 6, status: 'available',
+    image: 'https://images.unsplash.com/photo-1595576508898-0ad5c879a061?auto=format&fit=crop&w=1200&q=80',
+    amenities: ['Work desk', 'Fast Wi-Fi', 'Quiet floor', 'Coffee station'],
+    description: 'A practical business room with a quiet layout, strong internet, and a simple professional stay experience.'
   }
 ];
 
@@ -111,7 +146,7 @@ function parseJsonList(value) { try { return Array.isArray(value) ? value : JSON
 function serializeRoom(room) { return { ...room, amenities: parseJsonList(room.amenities), finalPrice: roomFinalPrice(room) }; }
 function publicUser(user) { return user ? { id: user.id, name: user.name, email: user.email, role: user.role, createdAt: user.created_at } : null; }
 function bookingPublic(row) {
-  return { id: row.id, reference: row.id.slice(-8).toUpperCase(), userId: row.user_id, customerName: row.customer_name, customerEmail: row.customer_email, guestName: row.guest_name, phone: row.phone, roomId: row.room_id, roomName: row.room_name, checkIn: row.check_in, checkOut: row.check_out, guests: row.guests, nights: row.nights, pricePerNight: row.price_per_night, serviceFees: row.service_fees, total: row.total, paymentMethod: row.payment_method, paymentStatus: row.payment_status, status: row.status, createdAt: row.created_at, updatedAt: row.updated_at };
+  return { id: row.id, reference: row.id.slice(-8).toUpperCase(), userId: row.user_id, customerName: row.customer_name, customerEmail: row.customer_email, guestName: row.guest_name, phone: row.phone, roomId: row.room_id, roomName: row.room_name, checkIn: row.check_in, checkOut: row.check_out, guests: row.guests, nights: row.nights, pricePerNight: row.price_per_night, serviceFees: row.service_fees, total: row.total, paymentMethod: row.payment_method, paymentStatus: row.payment_status, paymentCardLast4: row.payment_card_last4 || '', paymentCardBrand: row.payment_card_brand || '', status: row.status, createdAt: row.created_at, updatedAt: row.updated_at };
 }
 function csvEscape(value) { const s = String(value ?? ''); return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s; }
 function jsonResponse(res, status, payload) { res.statusCode = status; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'no-store'); res.setHeader('Access-Control-Allow-Origin', '*'); res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS'); res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); res.end(JSON.stringify(payload)); }
@@ -197,18 +232,20 @@ async function ensureDatabase() {
         total INTEGER NOT NULL,
         payment_method TEXT NOT NULL,
         payment_status TEXT NOT NULL DEFAULT 'pending',
+        payment_card_last4 TEXT DEFAULT '',
+        payment_card_brand TEXT DEFAULT '',
         status TEXT NOT NULL DEFAULT 'pending',
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       );
       CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings(user_id);
       CREATE INDEX IF NOT EXISTS idx_bookings_room_dates ON bookings(room_id, check_in, check_out);
+      ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_card_last4 TEXT DEFAULT '';
+      ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_card_brand TEXT DEFAULT '';
     `);
-    const count = Number((await query('SELECT COUNT(*)::int AS count FROM rooms'))[0].count);
-    if (count === 0) {
-      for (const r of initialRooms) {
-        await query(`INSERT INTO rooms (id,name,location,category,capacity,beds,size,price,discount,inventory,status,image,amenities,description,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) ON CONFLICT (id) DO NOTHING`, [r.id,r.name,r.location,r.category,r.capacity,r.beds,r.size,r.price,r.discount,r.inventory,r.status,r.image,JSON.stringify(r.amenities),r.description,nowIso(),nowIso()]);
-      }
+    // Always add any newly shipped room templates without deleting existing database data.
+    for (const r of initialRooms) {
+      await query(`INSERT INTO rooms (id,name,location,category,capacity,beds,size,price,discount,inventory,status,image,amenities,description,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) ON CONFLICT (id) DO NOTHING`, [r.id,r.name,r.location,r.category,r.capacity,r.beds,r.size,r.price,r.discount,r.inventory,r.status,r.image,JSON.stringify(r.amenities),r.description,nowIso(),nowIso()]);
     }
     await query(`UPDATE rooms SET status='available', updated_at=$1 WHERE status='maintenance'`, [nowIso()]);
     const admin = (await query('SELECT * FROM users WHERE email=$1', [ADMIN_EMAIL]))[0];
@@ -269,6 +306,46 @@ async function findExistingActiveBooking(userId, roomId, checkIn, checkOut) {
   return (await query(`SELECT * FROM bookings WHERE user_id=$1 AND room_id=$2 AND check_in=$3 AND check_out=$4 AND status IN ('pending','confirmed','checked_in') ORDER BY created_at DESC LIMIT 1`, [userId, roomId, checkIn, checkOut]))[0];
 }
 
+
+function cleanCardNumber(value) { return String(value || '').replace(/\D/g, ''); }
+function detectCardBrand(number) {
+  const n = cleanCardNumber(number);
+  if (/^4/.test(n)) return 'Visa';
+  if (/^(5[1-5]|2[2-7])/.test(n)) return 'Mastercard';
+  if (/^3[47]/.test(n)) return 'American Express';
+  return 'Card';
+}
+function luhnCheck(number) {
+  const n = cleanCardNumber(number);
+  if (n.length < 13 || n.length > 19) return false;
+  let sum = 0, shouldDouble = false;
+  for (let i = n.length - 1; i >= 0; i--) {
+    let digit = Number(n[i]);
+    if (shouldDouble) { digit *= 2; if (digit > 9) digit -= 9; }
+    sum += digit; shouldDouble = !shouldDouble;
+  }
+  return sum % 10 === 0;
+}
+function isValidExpiry(value) {
+  const m = String(value || '').trim().match(/^(0[1-9]|1[0-2])\/?([0-9]{2}|[0-9]{4})$/);
+  if (!m) return false;
+  const month = Number(m[1]);
+  const year = Number(m[2].length === 2 ? '20' + m[2] : m[2]);
+  const expiryEnd = new Date(year, month, 0, 23, 59, 59);
+  return expiryEnd >= new Date();
+}
+function validateCardPayload(card = {}) {
+  const number = cleanCardNumber(card.number);
+  const holder = normalizeText(card.holder || '');
+  const expiry = normalizeText(card.expiry || '');
+  const cvv = String(card.cvv || '').trim();
+  if (holder.length < 3) return { error: 'Please enter the card holder name.' };
+  if (!luhnCheck(number)) return { error: 'Please enter a valid card number.' };
+  if (!isValidExpiry(expiry)) return { error: 'Please enter a valid expiry date, e.g. 12/28.' };
+  if (!/^\d{3,4}$/.test(cvv)) return { error: 'Please enter a valid CVV.' };
+  return { last4: number.slice(-4), brand: detectCardBrand(number) };
+}
+
 async function validateBookingInput(body, user) {
   const guestName = normalizeText(body.guestName || user?.name);
   const phone = normalizePhone(body.phone);
@@ -285,17 +362,23 @@ async function validateBookingInput(body, user) {
   const today = new Date(); today.setHours(0,0,0,0); const start = new Date(`${checkIn}T00:00:00`); if (start < today) return { error: 'Check-in date cannot be in the past.' };
   const nights = calculateNights(checkIn, checkOut); if (!nights) return { error: 'Check-out date must be after check-in date.' };
   if (!Number.isInteger(guests) || guests < 1 || guests > Number(room.capacity)) return { error: `This room supports from 1 to ${room.capacity} guests.` };
-  const allowedPayments = ['cash_on_arrival','card_on_arrival','bank_transfer']; if (!allowedPayments.includes(paymentMethod)) return { error: 'Please select a valid payment method.' };
+  const allowedPayments = ['cash_on_arrival','card_on_arrival','bank_transfer','online_card']; if (!allowedPayments.includes(paymentMethod)) return { error: 'Please select a valid payment method.' };
+  let cardInfo = { last4: '', brand: '' };
+  if (paymentMethod === 'online_card') {
+    const cardCheck = validateCardPayload(body.card || {});
+    if (cardCheck.error) return { error: cardCheck.error };
+    cardInfo = { last4: cardCheck.last4, brand: cardCheck.brand };
+  }
   const existingBooking = await findExistingActiveBooking(user.id, room.id, checkIn, checkOut);
   if (existingBooking) return { error: `You already confirmed this booking once. Reference: ${existingBooking.id.slice(-8).toUpperCase()}` };
   if (await availableUnits(room, checkIn, checkOut) < 1) return { error: 'This room is fully booked for the selected dates. Please choose another room or date.' };
-  return { guestName, phone, room, checkIn, checkOut, guests, nights, paymentMethod };
+  return { guestName, phone, room, checkIn, checkOut, guests, nights, paymentMethod, cardInfo };
 }
 async function createBooking(user, data) {
   const price = roomFinalPrice(data.room); const total = price * data.nights + SERVICE_FEES; const id = createId('BK'); const t = nowIso();
-  const row = { id, user_id: user.id, guest_name: data.guestName, phone: data.phone, room_id: data.room.id, room_name: data.room.name, check_in: data.checkIn, check_out: data.checkOut, guests: data.guests, nights: data.nights, price_per_night: price, service_fees: SERVICE_FEES, total, payment_method: data.paymentMethod, payment_status: 'pending', status: 'pending', created_at: t, updated_at: t };
+  const row = { id, user_id: user.id, guest_name: data.guestName, phone: data.phone, room_id: data.room.id, room_name: data.room.name, check_in: data.checkIn, check_out: data.checkOut, guests: data.guests, nights: data.nights, price_per_night: price, service_fees: SERVICE_FEES, total, payment_method: data.paymentMethod, payment_status: data.paymentMethod === 'online_card' ? 'paid' : 'pending', payment_card_last4: data.cardInfo?.last4 || '', payment_card_brand: data.cardInfo?.brand || '', status: 'pending', created_at: t, updated_at: t };
   if (!hasPostgres) { memory.bookings.unshift(row); return { ...row, customer_name: user.name, customer_email: user.email }; }
-  await query(`INSERT INTO bookings (id,user_id,guest_name,phone,room_id,room_name,check_in,check_out,guests,nights,price_per_night,service_fees,total,payment_method,payment_status,status,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)`, [id,user.id,data.guestName,data.phone,data.room.id,data.room.name,data.checkIn,data.checkOut,data.guests,data.nights,price,SERVICE_FEES,total,data.paymentMethod,'pending','pending',t,t]);
+  await query(`INSERT INTO bookings (id,user_id,guest_name,phone,room_id,room_name,check_in,check_out,guests,nights,price_per_night,service_fees,total,payment_method,payment_status,payment_card_last4,payment_card_brand,status,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)`, [id,user.id,data.guestName,data.phone,data.room.id,data.room.name,data.checkIn,data.checkOut,data.guests,data.nights,price,SERVICE_FEES,total,data.paymentMethod,data.paymentMethod === 'online_card' ? 'paid' : 'pending',data.cardInfo?.last4 || '',data.cardInfo?.brand || '','pending',t,t]);
   return (await query('SELECT b.*, u.name AS customer_name, u.email AS customer_email FROM bookings b JOIN users u ON u.id=b.user_id WHERE b.id=$1', [id]))[0];
 }
 async function getBookingsWithUsers() {
@@ -323,10 +406,11 @@ async function handleApi(req, res) {
     const cancelMatch = url.pathname.match(/^\/api\/bookings\/([^/]+)\/cancel$/); if (cancelMatch && req.method === 'PATCH') { const user = await requireUser(req, res); if (!user) return; if (user.role === 'admin') return jsonResponse(res, 403, { message: 'Admin accounts manage bookings from the Admin Dashboard.' }); const id = decodeURIComponent(cancelMatch[1]); let booking = hasPostgres ? (await query('SELECT * FROM bookings WHERE id=$1 AND user_id=$2', [id, user.id]))[0] : memory.bookings.find(b=>b.id===id && b.user_id===user.id); if (!booking) return jsonResponse(res, 404, { message: 'Booking not found.' }); if (!['pending','confirmed'].includes(booking.status)) return jsonResponse(res, 400, { message: 'This booking cannot be cancelled.' }); booking.status='cancelled'; booking.updated_at=nowIso(); if (hasPostgres) await query('UPDATE bookings SET status=$1, updated_at=$2 WHERE id=$3', [booking.status, booking.updated_at, id]); return jsonResponse(res, 200, { message: 'Booking cancelled successfully.' }); }
     if (url.pathname === '/api/admin/overview' && req.method === 'GET') { const admin = await requireAdmin(req, res); if (!admin) return; const users = hasPostgres ? Number((await query("SELECT COUNT(*)::int AS count FROM users WHERE role='customer'"))[0].count) : memory.users.filter(u=>u.role==='customer').length; const bookings = hasPostgres ? Number((await query('SELECT COUNT(*)::int AS count FROM bookings'))[0].count) : memory.bookings.length; const activeBookings = hasPostgres ? Number((await query("SELECT COUNT(*)::int AS count FROM bookings WHERE status IN ('pending','confirmed','checked_in')"))[0].count) : memory.bookings.filter(b=>['pending','confirmed','checked_in'].includes(b.status)).length; const revenue = hasPostgres ? Number((await query("SELECT COALESCE(SUM(total),0)::int AS total FROM bookings WHERE status NOT IN ('cancelled','rejected')"))[0].total) : memory.bookings.filter(b=>!['cancelled','rejected'].includes(b.status)).reduce((s,b)=>s+Number(b.total),0); const rooms = hasPostgres ? Number((await query('SELECT COUNT(*)::int AS count FROM rooms'))[0].count) : memory.rooms.length; return jsonResponse(res, 200, { stats: { users, bookings, activeBookings, revenue, rooms } }); }
     if (url.pathname === '/api/admin/users' && req.method === 'GET') { const admin = await requireAdmin(req, res); if (!admin) return; let users; if (hasPostgres) users = await query(`SELECT u.id,u.name,u.email,u.role,u.created_at, COUNT(b.id)::int AS bookings_count, COALESCE(SUM(CASE WHEN b.status NOT IN ('cancelled','rejected') THEN b.total ELSE 0 END),0)::int AS total_spent FROM users u LEFT JOIN bookings b ON b.user_id=u.id GROUP BY u.id ORDER BY u.created_at DESC`); else users = memory.users.map(u=>{ const bs=memory.bookings.filter(b=>b.user_id===u.id); return { id:u.id,name:u.name,email:u.email,role:u.role,created_at:u.created_at, bookings_count:bs.length, total_spent:bs.filter(b=>!['cancelled','rejected'].includes(b.status)).reduce((s,b)=>s+Number(b.total),0) }; }).sort((a,b)=>b.created_at.localeCompare(a.created_at)); return jsonResponse(res, 200, { users }); }
+    const adminUserDeleteMatch = url.pathname.match(/^\/api\/admin\/users\/([^/]+)$/); if (adminUserDeleteMatch && req.method === 'DELETE') { const admin = await requireAdmin(req, res); if (!admin) return; const id = decodeURIComponent(adminUserDeleteMatch[1]); const target = hasPostgres ? (await query('SELECT * FROM users WHERE id=$1', [id]))[0] : memory.users.find(u=>u.id===id); if (!target) return jsonResponse(res, 404, { message: 'User not found.' }); if (target.role === 'admin') return jsonResponse(res, 403, { message: 'Admin users cannot be deleted from this panel.' }); if (target.id === admin.id) return jsonResponse(res, 403, { message: 'You cannot delete your own account.' }); if (hasPostgres) await query('DELETE FROM users WHERE id=$1 AND role <> $2', [id, 'admin']); else { memory.bookings = memory.bookings.filter(b=>b.user_id !== id); memory.users = memory.users.filter(u=>u.id !== id); } return jsonResponse(res, 200, { message: 'User and related bookings deleted successfully.' }); }
     if (url.pathname === '/api/admin/bookings' && req.method === 'GET') { const admin = await requireAdmin(req, res); if (!admin) return; const q = normalizeText(url.searchParams.get('q') || '').toLowerCase(); const status = normalizeText(url.searchParams.get('status') || 'all'); const dateFrom = dateOnly(url.searchParams.get('dateFrom')); const dateTo = dateOnly(url.searchParams.get('dateTo')); let rows = await getBookingsWithUsers(); if (status !== 'all') rows = rows.filter(r => r.status === status); if (dateFrom) rows = rows.filter(r => r.check_in >= dateFrom); if (dateTo) rows = rows.filter(r => r.check_in <= dateTo); if (q) rows = rows.filter(r => `${r.id} ${r.customer_name} ${r.customer_email} ${r.guest_name} ${r.phone} ${r.room_name}`.toLowerCase().includes(q)); return jsonResponse(res, 200, { bookings: rows.map(bookingPublic) }); }
     const adminBookingStatusMatch = url.pathname.match(/^\/api\/admin\/bookings\/([^/]+)\/status$/); if (adminBookingStatusMatch && req.method === 'PATCH') { const admin = await requireAdmin(req, res); if (!admin) return; const id = decodeURIComponent(adminBookingStatusMatch[1]); const body = await readBody(req); const status = normalizeText(body.status); const allowed = ['pending','confirmed','checked_in','checked_out','cancelled','rejected']; if (!allowed.includes(status)) return jsonResponse(res, 400, { message: 'Invalid booking status.' }); const booking = hasPostgres ? (await query('SELECT * FROM bookings WHERE id=$1', [id]))[0] : memory.bookings.find(b=>b.id===id); if (!booking) return jsonResponse(res, 404, { message: 'Booking not found.' }); booking.status=status; booking.updated_at=nowIso(); if (hasPostgres) await query('UPDATE bookings SET status=$1, updated_at=$2 WHERE id=$3', [status, booking.updated_at, id]); return jsonResponse(res, 200, { message: 'Booking status updated.' }); }
     const adminPaymentMatch = url.pathname.match(/^\/api\/admin\/bookings\/([^/]+)\/payment$/); if (adminPaymentMatch && req.method === 'PATCH') { const admin = await requireAdmin(req, res); if (!admin) return; const id = decodeURIComponent(adminPaymentMatch[1]); const body = await readBody(req); const paymentStatus = normalizeText(body.paymentStatus); const allowed = ['pending','paid','refunded','failed']; if (!allowed.includes(paymentStatus)) return jsonResponse(res, 400, { message: 'Invalid payment status.' }); const booking = hasPostgres ? (await query('SELECT * FROM bookings WHERE id=$1', [id]))[0] : memory.bookings.find(b=>b.id===id); if (!booking) return jsonResponse(res, 404, { message: 'Booking not found.' }); booking.payment_status=paymentStatus; booking.updated_at=nowIso(); if (hasPostgres) await query('UPDATE bookings SET payment_status=$1, updated_at=$2 WHERE id=$3', [paymentStatus, booking.updated_at, id]); return jsonResponse(res, 200, { message: 'Payment status updated.' }); }
-    if (url.pathname === '/api/admin/export/bookings.csv' && req.method === 'GET') { const admin = await requireAdmin(req, res); if (!admin) return; const rows = (await getBookingsWithUsers()).map(bookingPublic); const headers = ['reference','customerName','customerEmail','guestName','phone','roomName','checkIn','checkOut','guests','nights','total','paymentMethod','paymentStatus','status','createdAt']; const csv = [headers.join(','), ...rows.map(r => headers.map(h => csvEscape(r[h])).join(','))].join('\n'); res.statusCode = 200; res.setHeader('Content-Type', 'text/csv; charset=utf-8'); res.setHeader('Content-Disposition', 'attachment; filename="room-reserve-bookings.csv"'); return res.end(csv); }
+    if (url.pathname === '/api/admin/export/bookings.csv' && req.method === 'GET') { const admin = await requireAdmin(req, res); if (!admin) return; const rows = (await getBookingsWithUsers()).map(bookingPublic); const headers = ['reference','customerName','customerEmail','guestName','phone','roomName','checkIn','checkOut','guests','nights','total','paymentMethod','paymentStatus','paymentCardBrand','paymentCardLast4','status','createdAt']; const csv = [headers.join(','), ...rows.map(r => headers.map(h => csvEscape(r[h])).join(','))].join('\n'); res.statusCode = 200; res.setHeader('Content-Type', 'text/csv; charset=utf-8'); res.setHeader('Content-Disposition', 'attachment; filename="room-reserve-bookings.csv"'); return res.end(csv); }
     return jsonResponse(res, 404, { message: 'API endpoint not found.' });
   } catch (error) { console.error(error); return jsonResponse(res, 500, { message: error.message || 'Internal server error.' }); }
 }

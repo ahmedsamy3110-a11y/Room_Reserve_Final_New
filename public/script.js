@@ -5,7 +5,7 @@ function qs(s, root=document){ return root.querySelector(s); }
 function qsa(s, root=document){ return [...root.querySelectorAll(s)]; }
 function page(){ return document.body.dataset.currentPage || ''; }
 function formatCurrency(v){ return `EGP ${Number(v||0).toLocaleString()}`; }
-function paymentLabel(v){ return tr({cash_on_arrival:'Cash on arrival',card_on_arrival:'Card on arrival',bank_transfer:'Bank transfer'}[v] || v); }
+function paymentLabel(v){ return tr({cash_on_arrival:'Cash on arrival',online_card:'Pay online by card',card_on_arrival:'Card on arrival',bank_transfer:'Bank transfer'}[v] || v); }
 function statusBadge(status){ const danger=['cancelled','rejected','failed']; const success=['confirmed','checked_in','checked_out','paid']; const cls=danger.includes(status)?'danger':success.includes(status)?'success':'warning'; const label=String(status||'pending').replaceAll('_',' '); return `<span class="badge ${cls}">${tr(label.charAt(0).toUpperCase()+label.slice(1))}</span>`; }
 
 function getCookie(name){
@@ -69,6 +69,7 @@ const I18N = {
   }
 };
 Object.assign(I18N.ar, {
+  'Pay online by card':'الدفع أونلاين بالفيزا', 'Card Holder':'اسم صاحب الكارت', 'Card Number':'رقم الكارت', 'Expiry':'تاريخ الانتهاء', 'CVV':'CVV', 'Name on card':'الاسم على الكارت', 'Demo online payment: the system validates the card and stores only the card brand and last 4 digits.':'دفع أونلاين تجريبي: النظام يتحقق من الكارت ويحفظ نوع الكارت وآخر 4 أرقام فقط.', 'Delete User':'حذف المستخدم', 'Delete this user and related bookings?':'حذف هذا المستخدم وكل حجوزاته؟', 'User deleted successfully.':'تم حذف المستخدم بنجاح.', 'Online card ending':'كارت أونلاين آخره', 'Please enter a valid card number.':'برجاء إدخال رقم كارت صحيح.', 'Please enter a valid expiry date, e.g. 12/28.':'برجاء إدخال تاريخ انتهاء صحيح مثل 12/28.', 'Please enter a valid CVV.':'برجاء إدخال CVV صحيح.', 'Please enter the card holder name.':'برجاء إدخال اسم صاحب الكارت.',
   'Product Edition':'نسخة احترافية',
   'Book smart hotel rooms in Egypt.':'احجز غرف فندقية ذكية في مصر.',
   'Room Reserve is a complete hotel booking system with user accounts, live room availability, customer bookings, an admin dashboard, payment status, profile management, and export tools.':'Room Reserve هو نظام حجز فندقي كامل يحتوي على حسابات مستخدمين، توافر مباشر للغرف، حجوزات العملاء، لوحة أدمن، حالة الدفع، إدارة الملف الشخصي، وأدوات تصدير.',
@@ -146,6 +147,18 @@ function applyLanguage(){
   });
 }
 function showLocalizedMessage(el, enMsg, type='info'){ showMessage(el, tr(enMsg), type); }
+
+
+Object.assign(I18N.ar, {
+  'Luxor Heritage Suite':'جناح الأقصر التراثي', 'Sharm Family Suite':'جناح عائلي شرم الشيخ', 'Giza Pyramid View Room':'غرفة بإطلالة الأهرامات', 'Grand Family Room for 6':'غرفة عائلية كبيرة لـ 6 أفراد', 'Business King Room':'غرفة بيزنس كينج',
+  'Luxor, Egypt':'الأقصر، مصر', 'Sharm El Sheikh, Egypt':'شرم الشيخ، مصر', 'Giza, Egypt':'الجيزة، مصر', 'North Coast, Egypt':'الساحل الشمالي، مصر', 'New Administrative Capital, Egypt':'العاصمة الإدارية الجديدة، مصر',
+  'Heritage':'تراثية', 'Business':'بيزنس', 'View':'إطلالة', 'Heritage design':'تصميم تراثي', 'Sleeps 6 guests':'تسع 6 أفراد', 'Large lounge':'مساحة جلوس كبيرة', '2 bathrooms':'حمامين', 'Business layout':'تجهيز بيزنس', 'Coffee station':'ركن قهوة', 'Quiet floor':'دور هادئ', 'Family layout':'تصميم عائلي', 'Sea breeze':'نسيم البحر', 'Kids corner':'ركن أطفال',
+  'A heritage-style suite for a luxury Egypt hotel concept, combining classic design with smart access.':'جناح بطابع تراثي لفندق فاخر في مصر، يجمع بين التصميم الكلاسيكي والدخول الذكي.',
+  'A comfortable family suite with enough space for parents and children, designed for longer beach stays.':'جناح عائلي مريح بمساحة مناسبة للأهل والأطفال، ومصمم للإقامات الشاطئية الطويلة.',
+  'A city hotel room with a premium view concept, suitable for tourists and short business stays.':'غرفة فندقية داخل المدينة بإطلالة مميزة، مناسبة للسياحة والإقامات العملية القصيرة.',
+  'A large family room built for groups up to six guests, with more space and practical sleeping arrangements.':'غرفة عائلية كبيرة للمجموعات حتى 6 أفراد، بمساحة أكبر وتوزيع نوم عملي.',
+  'A practical business room with a quiet layout, strong internet, and a simple professional stay experience.':'غرفة عملية للبيزنس بتصميم هادئ وإنترنت قوي وتجربة إقامة احترافية بسيطة.'
+});
 
 function updateAuthUI(){
   const user=getUser();
@@ -257,6 +270,41 @@ function setupPhoneValidation(){
   });
 }
 
+
+function cleanCardClient(value){ return String(value || '').replace(/\D/g,''); }
+function luhnClient(number){
+  const n=cleanCardClient(number); if(n.length<13 || n.length>19) return false;
+  let sum=0, dbl=false; for(let i=n.length-1;i>=0;i--){ let d=Number(n[i]); if(dbl){ d*=2; if(d>9)d-=9; } sum+=d; dbl=!dbl; }
+  return sum % 10 === 0;
+}
+function validExpiryClient(value){
+  const m=String(value||'').trim().match(/^(0[1-9]|1[0-2])\/?([0-9]{2}|[0-9]{4})$/); if(!m) return false;
+  const y=Number(m[2].length===2 ? '20'+m[2] : m[2]); const month=Number(m[1]);
+  return new Date(y, month, 0, 23, 59, 59) >= new Date();
+}
+function setupPaymentFields(){
+  const payment=qs('#paymentMethod'); const fields=qs('#cardPaymentFields'); if(!payment || !fields) return;
+  const update=()=>{ const show=payment.value==='online_card'; fields.hidden=!show; qsa('input', fields).forEach(i=>{ if(show) i.setAttribute('required','required'); else i.removeAttribute('required'); }); };
+  payment.addEventListener('change', update); update();
+  const num=qs('#cardNumber'); const exp=qs('#cardExpiry'); const cvv=qs('#cardCvv');
+  num?.addEventListener('input',()=>{ const digits=cleanCardClient(num.value).slice(0,19); num.value=digits.replace(/(.{4})/g,'$1 ').trim(); });
+  exp?.addEventListener('input',()=>{ let d=cleanCardClient(exp.value).slice(0,4); if(d.length>2)d=d.slice(0,2)+'/'+d.slice(2); exp.value=d; });
+  cvv?.addEventListener('input',()=>{ cvv.value=cleanCardClient(cvv.value).slice(0,4); });
+}
+function validateOnlineCardIfNeeded(){
+  const method=qs('#paymentMethod')?.value;
+  if(method!=='online_card') return { ok:true, card:null };
+  const holder=qs('#cardHolder')?.value.trim() || '';
+  const number=cleanCardClient(qs('#cardNumber')?.value || '');
+  const expiry=qs('#cardExpiry')?.value.trim() || '';
+  const cvv=cleanCardClient(qs('#cardCvv')?.value || '');
+  if(holder.length<3) return { ok:false, message:'Please enter the card holder name.' };
+  if(!luhnClient(number)) return { ok:false, message:'Please enter a valid card number.' };
+  if(!validExpiryClient(expiry)) return { ok:false, message:'Please enter a valid expiry date, e.g. 12/28.' };
+  if(!/^\d{3,4}$/.test(cvv)) return { ok:false, message:'Please enter a valid CVV.' };
+  return { ok:true, card:{ holder, number, expiry, cvv } };
+}
+
 function setupForms(){
   qs('#roomSearchForm')?.addEventListener('submit', e=>{e.preventDefault(); renderRoomsPage();});
   qs('#bookingSearchForm')?.addEventListener('submit', e=>{e.preventDefault(); renderBookingRooms();});
@@ -271,15 +319,17 @@ function setupForms(){
     if(getUser()?.role === 'admin') { showLocalizedMessage(result,'Admin accounts cannot create customer bookings. Use the Admin Dashboard to manage reservations.','error'); return; }
     const rawPhone = qs('#guestPhone').value;
     if(!isValidEgyptPhone(rawPhone)) { showLocalizedMessage(result,'Please enter a valid Egyptian mobile number. Example: 01012345678.','error'); qs('#guestPhone')?.focus(); return; }
+    const cardCheck = validateOnlineCardIfNeeded();
+    if(!cardCheck.ok){ showLocalizedMessage(result, cardCheck.message, 'error'); return; }
     const body={ guestName:qs('#guestName').value, phone:normalizeEgyptPhoneClient(rawPhone), roomId:qs('#roomType').value, checkIn:qs('#checkin').value, checkOut:qs('#checkout').value, guests:Number(qs('#guestsCount').value), paymentMethod:qs('#paymentMethod').value };
+    if(cardCheck.card) body.card = cardCheck.card;
     try{
       window.__bookingSubmitting = true;
       if(submitBtn){ submitBtn.disabled=true; submitBtn.textContent=tr('Booking is being saved...'); }
       const data=await api('/api/bookings',{method:'POST',body:JSON.stringify(body)});
       form.dataset.locked='true';
       if(submitBtn){ submitBtn.textContent=tr('Booking Confirmed'); submitBtn.dataset.lockedText='true'; }
-      showMessage(result,`${tr('Booking confirmed. Reference:')} ${data.booking.reference}. ${tr('Total')}: ${formatCurrency(data.booking.total)}
-${tr('View My Bookings')}: bookings.html`,'success');
+      if(result){ result.className='message success booking-success-card'; result.innerHTML=`<strong>${tr('Booking Confirmed')}</strong><span>${tr('Booking confirmed. Reference:')} ${data.booking.reference}</span><span>${tr('Total')}: ${formatCurrency(data.booking.total)}</span><a href="bookings.html">${tr('View My Bookings')}</a>`; }
       toast(tr('Booking saved successfully.'));
       await renderBookingRooms();
     }catch(err){
@@ -394,12 +444,13 @@ function setupAuth(){
   setMode('login');
 }
 async function renderBookings(){ const root=qs('#myBookings'); if(!root) return; try{ const data=await api('/api/bookings'); const bookings=data.bookings||[]; root.innerHTML = bookings.map(b=>bookingCard(b,false)).join('') || '<div class="booking-card">No bookings yet.</div>'; qsa('.cancel-booking-btn').forEach(btn=>btn.addEventListener('click',async()=>{ if(!confirm('Cancel this booking?')) return; try{ await api(`/api/bookings/${encodeURIComponent(btn.dataset.id)}/cancel`,{method:'PATCH'}); toast('Booking cancelled.'); renderBookings(); }catch(err){ toast(err.message); } })); }catch(err){ root.innerHTML=`<div class="message error" style="display:block">${err.message}</div>`; } }
-function bookingCard(b, admin=false){ return `<article class="booking-card"><div class="booking-card-head"><div><span class="badge category">${tr('Reference')}</span><h2>${b.reference}</h2></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${statusBadge(b.status)}${statusBadge(b.paymentStatus)}</div></div><div class="info-grid">${admin?`<div class="info-item"><span>${tr('Customer')}</span><strong>${b.customerName}</strong></div><div class="info-item"><span>${tr('Email')}</span><strong>${b.customerEmail}</strong></div>`:''}<div class="info-item"><span>${tr('Guest')}</span><strong>${b.guestName}</strong></div><div class="info-item"><span>${tr('Phone')}</span><strong>${b.phone || '-'}</strong></div><div class="info-item"><span>${tr('Room')}</span><strong>${tRoom(b.roomName)}</strong></div><div class="info-item"><span>${tr('Stay')}</span><strong>${b.checkIn} → ${b.checkOut}</strong></div><div class="info-item"><span>${tr('Guests')}</span><strong>${b.guests}</strong></div><div class="info-item"><span>${tr('Nights')}</span><strong>${b.nights}</strong></div><div class="info-item"><span>${tr('Total')}</span><strong>${formatCurrency(b.total)}</strong></div><div class="info-item"><span>${tr('Payment')}</span><strong>${paymentLabel(b.paymentMethod)}</strong></div><div class="info-item"><span>${tr('Created')}</span><strong>${new Date(b.createdAt).toLocaleString()}</strong></div></div>${admin?adminActions(b):userActions(b)}</article>`; }
+function bookingCard(b, admin=false){ return `<article class="booking-card"><div class="booking-card-head"><div><span class="badge category">${tr('Reference')}</span><h2>${b.reference}</h2></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${statusBadge(b.status)}${statusBadge(b.paymentStatus)}</div></div><div class="info-grid">${admin?`<div class="info-item"><span>${tr('Customer')}</span><strong>${b.customerName}</strong></div><div class="info-item"><span>${tr('Email')}</span><strong>${b.customerEmail}</strong></div>`:''}<div class="info-item"><span>${tr('Guest')}</span><strong>${b.guestName}</strong></div><div class="info-item"><span>${tr('Phone')}</span><strong>${b.phone || '-'}</strong></div><div class="info-item"><span>${tr('Room')}</span><strong>${tRoom(b.roomName)}</strong></div><div class="info-item"><span>${tr('Stay')}</span><strong>${b.checkIn} → ${b.checkOut}</strong></div><div class="info-item"><span>${tr('Guests')}</span><strong>${b.guests}</strong></div><div class="info-item"><span>${tr('Nights')}</span><strong>${b.nights}</strong></div><div class="info-item"><span>${tr('Total')}</span><strong>${formatCurrency(b.total)}</strong></div><div class="info-item"><span>${tr('Payment')}</span><strong>${paymentLabel(b.paymentMethod)}${b.paymentCardLast4 ? ` · ${tr('Online card ending')} ${b.paymentCardLast4}` : ''}</strong></div><div class="info-item"><span>${tr('Created')}</span><strong>${new Date(b.createdAt).toLocaleString()}</strong></div></div>${admin?adminActions(b):userActions(b)}</article>`; }
 function userActions(b){ if(!['pending','confirmed'].includes(b.status)) return ''; return `<div class="admin-actions"><button class="btn-danger cancel-booking-btn" data-id="${b.id}" type="button">${tr('Cancel Booking')}</button></div>`; }
 function adminActions(b){ return `<div class="admin-actions"><select class="admin-status-select" data-id="${b.id}" data-current="${b.status}"><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="checked_in">Checked in</option><option value="checked_out">Checked out</option><option value="cancelled">Cancelled</option><option value="rejected">Rejected</option></select><select class="admin-payment-select" data-id="${b.id}" data-current="${b.paymentStatus}"><option value="pending">Payment pending</option><option value="paid">Paid</option><option value="refunded">Refunded</option><option value="failed">Payment failed</option></select></div>`; }
-async function renderAdmin(){ if(page()!=='admin') return; try{ const overview=await api('/api/admin/overview'); const s=overview.stats; qs('#adminStats').innerHTML = `<div class="admin-card"><span>${tr('Customers')}</span><strong>${s.users}</strong></div><div class="admin-card"><span>${tr('Bookings')}</span><strong>${s.bookings}</strong></div><div class="admin-card"><span>${tr('Active')}</span><strong>${s.activeBookings}</strong></div><div class="admin-card"><span>${tr('Revenue')}</span><strong>${formatCurrency(s.revenue)}</strong></div><div class="admin-card"><span>${tr('Rooms')}</span><strong>${s.rooms}</strong></div>`; await renderAdminBookings(); const users=await api('/api/admin/users'); qs('#adminUsers').innerHTML = users.users.map(u=>`<article class="booking-card"><div class="info-grid"><div class="info-item"><span>Name</span><strong>${u.name}</strong></div><div class="info-item"><span>Email</span><strong>${u.email}</strong></div><div class="info-item"><span>Role</span><strong>${u.role}</strong></div><div class="info-item"><span>Bookings</span><strong>${u.bookings_count}</strong></div><div class="info-item"><span>Total</span><strong>${formatCurrency(u.total_spent)}</strong></div><div class="info-item"><span>Created</span><strong>${new Date(u.created_at).toLocaleString()}</strong></div></div></article>`).join(''); qs('#exportCsvBtn').onclick=(e)=>{ e.preventDefault(); const token=getToken(); location.href=`/api/admin/export/bookings.csv?token=${encodeURIComponent(token)}`; alert('If export does not start, use API export after login from the same browser.'); }; }catch(err){ qs('#adminBookings').innerHTML=`<div class="message error" style="display:block">${err.message}</div>`; } }
+async function renderAdmin(){ if(page()!=='admin') return; try{ const overview=await api('/api/admin/overview'); const s=overview.stats; qs('#adminStats').innerHTML = `<div class="admin-card"><span>${tr('Customers')}</span><strong>${s.users}</strong></div><div class="admin-card"><span>${tr('Bookings')}</span><strong>${s.bookings}</strong></div><div class="admin-card"><span>${tr('Active')}</span><strong>${s.activeBookings}</strong></div><div class="admin-card"><span>${tr('Revenue')}</span><strong>${formatCurrency(s.revenue)}</strong></div><div class="admin-card"><span>${tr('Rooms')}</span><strong>${s.rooms}</strong></div>`; await renderAdminBookings(); const users=await api('/api/admin/users'); qs('#adminUsers').innerHTML = users.users.map(u=>`<article class="booking-card user-card"><div class="info-grid"><div class="info-item"><span>Name</span><strong>${u.name}</strong></div><div class="info-item"><span>Email</span><strong>${u.email}</strong></div><div class="info-item"><span>Role</span><strong>${u.role}</strong></div><div class="info-item"><span>Bookings</span><strong>${u.bookings_count}</strong></div><div class="info-item"><span>Total</span><strong>${formatCurrency(u.total_spent)}</strong></div><div class="info-item"><span>Created</span><strong>${new Date(u.created_at).toLocaleString()}</strong></div></div>${u.role==='admin'?'':`<div class="admin-actions"><button class="btn-danger delete-user-btn" type="button" data-id="${u.id}" data-name="${u.name}">${tr('Delete User')}</button></div>`}</article>`).join('');
+      qsa('.delete-user-btn').forEach(btn=>btn.addEventListener('click',async()=>{ if(!confirm(tr('Delete this user and related bookings?'))) return; try{ await api(`/api/admin/users/${encodeURIComponent(btn.dataset.id)}`,{method:'DELETE'}); toast(tr('User deleted successfully.')); renderAdmin(); }catch(err){ toast(err.message); } })); qs('#exportCsvBtn').onclick=(e)=>{ e.preventDefault(); const token=getToken(); location.href=`/api/admin/export/bookings.csv?token=${encodeURIComponent(token)}`; alert('If export does not start, use API export after login from the same browser.'); }; }catch(err){ qs('#adminBookings').innerHTML=`<div class="message error" style="display:block">${err.message}</div>`; } }
 async function renderAdminBookings(){ const params=new URLSearchParams(); const q=qs('#adminQ')?.value||''; const status=qs('#adminStatus')?.value||'all'; const dateFrom=qs('#adminDateFrom')?.value||''; const dateTo=qs('#adminDateTo')?.value||''; if(q)params.set('q',q); if(status)params.set('status',status); if(dateFrom)params.set('dateFrom',dateFrom); if(dateTo)params.set('dateTo',dateTo); const data=await api(`/api/admin/bookings?${params}`); qs('#adminBookings').innerHTML = data.bookings.map(b=>bookingCard(b,true)).join('') || '<div class="booking-card">No bookings found.</div>'; qsa('.admin-status-select').forEach(sel=>{ const card=sel.closest('.booking-card'); sel.value = sel.dataset.current || 'pending'; sel.addEventListener('change',async()=>{ try{ await api(`/api/admin/bookings/${encodeURIComponent(sel.dataset.id)}/status`,{method:'PATCH',body:JSON.stringify({status:sel.value})}); toast('Status updated'); renderAdmin(); }catch(err){ toast(err.message); } }); }); qsa('.admin-payment-select').forEach(sel=>{ sel.value = sel.dataset.current || 'pending'; sel.addEventListener('change',async()=>{ try{ await api(`/api/admin/bookings/${encodeURIComponent(sel.dataset.id)}/payment`,{method:'PATCH',body:JSON.stringify({paymentStatus:sel.value})}); toast('Payment updated'); renderAdmin(); }catch(err){ toast(err.message); } }); }); }
 function setupAdminFilters(){ qs('#adminFilters')?.addEventListener('submit',e=>{e.preventDefault(); renderAdminBookings();}); }
 async function setupProfile(){ if(page()!=='profile') return; const user=getUser(); if(user){ qs('#profileName').value=user.name; qs('#profileEmail').value=user.email; } qs('#profileForm')?.addEventListener('submit',async e=>{e.preventDefault(); try{ const data=await api('/api/profile',{method:'PUT',body:JSON.stringify({name:qs('#profileName').value})}); setSession(getToken(),data.user); updateAuthUI(); showMessage(qs('#profileMessage'),'Profile updated successfully.','success'); }catch(err){ showMessage(qs('#profileMessage'),err.message,'error'); }}); qs('#passwordForm')?.addEventListener('submit',async e=>{e.preventDefault(); try{ await api('/api/profile/password',{method:'PUT',body:JSON.stringify({currentPassword:qs('#currentPassword').value,newPassword:qs('#newPassword').value})}); showMessage(qs('#passwordMessage'),'Password updated successfully.','success'); e.target.reset(); }catch(err){ showMessage(qs('#passwordMessage'),err.message,'error'); }}); }
-async function init(){ await refreshSession(4); insertLangToggle(); setupPasswordToggles(); updateAuthUI(); enforceProtected(); setupProtectedLinks(); setupLogout(); setupDates(); setupPhoneValidation(); setupAuth(); setupForms(); setupAdminFilters(); applyBookingParams(); if(getUser() && qs('#guestName')) qs('#guestName').value=getUser().name; if(page()==='rooms') { await renderRoomsPage(); } if(page()==='booking') { await renderBookingRooms(); } if(page()==='bookings') await renderBookings(); if(page()==='admin') await renderAdmin(); if(page()==='profile') setupProfile(); applyLanguage(); }
+async function init(){ await refreshSession(4); insertLangToggle(); setupPasswordToggles(); updateAuthUI(); enforceProtected(); setupProtectedLinks(); setupLogout(); setupDates(); setupPhoneValidation(); setupPaymentFields(); setupAuth(); setupForms(); setupAdminFilters(); applyBookingParams(); if(getUser() && qs('#guestName')) qs('#guestName').value=getUser().name; if(page()==='rooms') { await renderRoomsPage(); } if(page()==='booking') { await renderBookingRooms(); } if(page()==='bookings') await renderBookings(); if(page()==='admin') await renderAdmin(); if(page()==='profile') setupProfile(); applyLanguage(); }
 document.addEventListener('DOMContentLoaded', init);

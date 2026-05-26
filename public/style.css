@@ -222,3 +222,30 @@ button[disabled]{opacity:.65;cursor:not-allowed}
   .nav-links{max-width:100%;}
   .booking-panel{order:-1!important;}
 }
+
+/* Admin user deletion, online payment, and compact booking panel */
+.booking-panel{max-height:calc(100vh - 105px);overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
+.booking-panel *{min-width:0;overflow-wrap:anywhere}
+.booking-panel form{display:grid;gap:8px}
+.booking-panel .form-group{margin-bottom:7px}
+.booking-panel input,.booking-panel select{padding:10px 12px;border-radius:14px}
+.booking-panel .summary-box{grid-template-columns:1fr 1fr;gap:7px;padding:12px;margin:6px 0 8px}
+.booking-panel .summary-box .total{grid-column:1/-1}
+.booking-submit-area{position:sticky;bottom:0;z-index:4;background:linear-gradient(180deg,rgba(255,255,255,.55),#fff 34%);padding-top:10px;margin-top:2px}
+.card-payment-fields{border:1px dashed rgba(22,134,165,.28);background:#f8fcfe;border-radius:18px;padding:12px;margin:2px 0 8px}
+.payment-note{font-size:.82rem;line-height:1.45;margin-bottom:8px;color:var(--primary-dark);font-weight:800}
+.booking-success-card{display:grid!important;gap:5px;line-height:1.45}.booking-success-card a{text-decoration:underline;color:var(--primary-dark)}
+.user-card .admin-actions{justify-content:flex-end;border-top:1px solid var(--border);padding-top:12px}
+@media (min-width:1041px){
+  .booking-layout{grid-template-columns:minmax(0,1fr) 340px;gap:20px}
+  .booking-panel h2{font-size:1.75rem;margin-bottom:8px}
+  .booking-panel .form-row{gap:8px}
+  .rooms-list .room-card{grid-template-columns:235px 1fr}
+  .rooms-list .room-image{min-height:210px}
+}
+@media (max-width:700px){
+  .booking-panel{max-height:none;overflow:visible}
+  .booking-panel .summary-box{grid-template-columns:1fr}
+  .card-payment-fields{padding:10px}
+  .booking-submit-area{position:static;padding-top:0;background:transparent}
+}

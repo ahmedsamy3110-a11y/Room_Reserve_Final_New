@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Booking | Room Reserve</title>
-  <link rel="stylesheet" href="style.css?v=ui-mobile-ar-final-2026" />
+  <link rel="stylesheet" href="style.css?v=admin-users-card-rooms-v1" />
 </head>
 <body data-current-page="booking" data-protected-page="true">
 <header class="site-header">
@@ -35,7 +35,7 @@
       <select id="bookingCategory"><option value="all">All categories</option><option value="standard">Standard</option><option value="deluxe">Deluxe</option><option value="suite">Suite</option><option value="family">Family</option><option value="sea">Sea View</option></select>
       <input type="date" id="bookingFilterCheckIn" aria-label="Filter check-in date">
       <input type="date" id="bookingFilterCheckOut" aria-label="Filter check-out date">
-      <select id="bookingFilterGuests"><option value="">Guests</option><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select>
+      <select id="bookingFilterGuests"><option value="">Guests</option><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>6</option></select>
       <button class="btn-primary" type="submit">Show Available</button>
       <button class="btn-soft" type="button" id="clearBookingFilters">Clear</button>
     </form>
@@ -48,7 +48,13 @@
       <div class="form-group"><label>Phone Number</label><input id="guestPhone" required inputmode="tel" autocomplete="tel" placeholder="01012345678" title="Enter a valid Egyptian mobile number, e.g. 01012345678"></div>
       <div class="form-group"><label>Selected Room</label><select id="roomType" required><option value="">Select a room</option></select></div>
       <div class="form-row"><div class="form-group"><label>Check In</label><input type="date" id="checkin" required></div><div class="form-group"><label>Check Out</label><input type="date" id="checkout" required></div></div>
-      <div class="form-row"><div class="form-group"><label>Guests</label><select id="guestsCount" required><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select></div><div class="form-group"><label>Payment</label><select id="paymentMethod" required><option value="cash_on_arrival">Cash on arrival</option><option value="card_on_arrival">Card on arrival</option><option value="bank_transfer">Bank transfer</option></select></div></div>
+      <div class="form-row"><div class="form-group"><label>Guests</label><select id="guestsCount" required><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div><div class="form-group"><label>Payment</label><select id="paymentMethod" required><option value="cash_on_arrival">Cash on arrival</option><option value="online_card">Pay online by card</option><option value="card_on_arrival">Card on arrival</option><option value="bank_transfer">Bank transfer</option></select></div></div>
+      <div class="card-payment-fields" id="cardPaymentFields" hidden>
+        <p class="payment-note">Demo online payment: the system validates the card and stores only the card brand and last 4 digits.</p>
+        <div class="form-group"><label>Card Holder</label><input id="cardHolder" autocomplete="cc-name" placeholder="Name on card"></div>
+        <div class="form-group"><label>Card Number</label><input id="cardNumber" inputmode="numeric" autocomplete="cc-number" maxlength="23" placeholder="4111 1111 1111 1111"></div>
+        <div class="form-row"><div class="form-group"><label>Expiry</label><input id="cardExpiry" inputmode="numeric" autocomplete="cc-exp" maxlength="5" placeholder="MM/YY"></div><div class="form-group"><label>CVV</label><input id="cardCvv" inputmode="numeric" autocomplete="cc-csc" maxlength="4" placeholder="123"></div></div>
+      </div>
       <div class="summary-box">
         <div><span>Nights</span><strong id="nightsValue">1</strong></div>
         <div><span>Available units</span><strong id="availableUnitsValue">-</strong></div>
@@ -56,12 +62,12 @@
         <div><span>Service fees</span><strong>EGP 250</strong></div>
         <div class="total"><span>Total</span><strong id="displayPrice">EGP 0</strong></div>
       </div>
-      <button class="btn-primary full-width" type="submit">Confirm Booking</button>
+      <div class="booking-submit-area"><button class="btn-primary full-width" type="submit">Confirm Booking</button></div>
     </form>
     <div class="message" id="bookingResult"></div>
   </aside>
 </main>
 <footer class="site-footer"><img src="assets/logo.png" alt="Room Reserve Logo"><p>© 2026 Room Reserve. Product-ready hotel booking system.</p></footer>
-<script src="script.js?v=ui-mobile-ar-final-2026"></script>
+<script src="script.js?v=admin-users-card-rooms-v1"></script>
 </body>
 </html>
