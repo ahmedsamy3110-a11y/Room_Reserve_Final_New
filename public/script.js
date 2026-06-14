@@ -98,7 +98,46 @@ Object.assign(I18N.ar, {
 
 Object.assign(I18N.ar, {
   'Profile':'الملف الشخصي','Account tools':'أدوات الحساب',
-  'Room Reserve is a complete hotel booking system with user accounts, live room availability, customer bookings, admin dashboard, payment status, profile management, and export tools.':'Room Reserve نظام حجز فندقي كامل فيه حسابات مستخدمين، توافر مباشر للغرف، حجوزات العملاء، لوحة أدمن، حالة الدفع، إدارة الملف الشخصي، وأدوات تصدير.'
+  'Room Reserve is a complete hotel booking system with user accounts, live room availability, customer bookings, admin dashboard, payment status, profile management, and export tools.':'Room Reserve نظام حجز فندقي كامل فيه حسابات مستخدمين، توافر مباشر للغرف، حجوزات العملاء، لوحة أدمن، حالة الدفع، إدارة الملف الشخصي، وأدوات تصدير.',
+  'Hotel Booking': 'حجز فنادق',
+  'Secure access': 'دخول آمن',
+  'Enter your full name': 'أدخل اسمك بالكامل',
+  'Save Profile': 'حفظ الملف الشخصي',
+  'Customer Profile': 'ملف العميل',
+  'Manage Profile': 'إدارة الملف الشخصي',
+  'Security': 'الأمان',
+  'Change Password': 'تغيير كلمة المرور',
+  'Current Password': 'كلمة المرور الحالية',
+  'New Password': 'كلمة المرور الجديدة',
+  'Update Password': 'تحديث كلمة المرور',
+  'Customer Area': 'منطقة العملاء',
+  'Only your own reservations are displayed here.': 'تظهر هنا حجوزاتك الخاصة فقط.',
+  'New Booking': 'حجز جديد',
+  'Admin Panel': 'لوحة الأدمن',
+  'Manage bookings, users, payment status, and reservation workflow.': 'إدارة الحجوزات والمستخدمين وحالة الدفع وسير عمل الحجز.',
+  'Export CSV': 'تصدير CSV',
+  'Search reference, guest, phone, email, room...': 'ابحث عن رقم الحجز، الضيف، التليفون، البريد، الغرفة...',
+  'All statuses': 'كل الحالات',
+  'Users': 'المستخدمون',
+  'Cancel this booking?': 'هل تريد إلغاء هذا الحجز؟',
+  'Booking cancelled.': 'تم إلغاء الحجز.',
+  'Status updated': 'تم تحديث الحالة',
+  'Payment updated': 'تم تحديث الدفع',
+  'Delete User': 'حذف المستخدم',
+  'Name': 'الاسم',
+  'Email': 'البريد الإلكتروني',
+  'Role': 'الدور',
+  'Bookings': 'الحجوزات',
+  'Total': 'الإجمالي',
+  'Created': 'تاريخ الإنشاء',
+  'Password updated. You are logged in now.': 'تم تحديث كلمة المرور. تم تسجيل دخولك الآن.',
+  'Login successful.': 'تم تسجيل الدخول بنجاح.',
+  'Account created successfully.': 'تم إنشاء الحساب بنجاح.',
+  'Login restored. Redirecting...': 'تم استعادة تسجيل الدخول. جاري التوجيه...',
+  'Enter your email and the new password first.': 'أدخل بريدك الإلكتروني وكلمة المرور الجديدة أولًا.',
+  'Yes': 'نعم',
+  'No': 'لا',
+  'Password must be 8+ chars with uppercase, lowercase, number & symbol.': 'يجب أن تكون كلمة المرور 8 أحرف فأكثر وتحتوي على حرف كبير، حرف صغير، رقم، ورمز.'
 });
 
 function tr(text){
@@ -119,32 +158,114 @@ function insertLangToggle(){
   btn.addEventListener('click', async()=>{ const next=(localStorage.getItem('rrLang')||'en')==='ar'?'en':'ar'; localStorage.setItem('rrLang',next); applyLanguage(); if(page()==='rooms') await renderRoomsPage(); if(page()==='booking') await renderBookingRooms(); if(page()==='bookings') await renderBookings(); if(page()==='admin') await renderAdmin(); applyLanguage(); });
   area.insertBefore(btn, area.firstChild);
 }
+function insertDarkModeToggle(){
+  if(qs('#darkModeToggle')) return;
+  const area = qs('.auth-area') || qs('.navbar');
+  if(!area) return;
+  const btn=document.createElement('button');
+  btn.id='darkModeToggle'; btn.className='dark-mode-toggle'; btn.type='button';
+  btn.setAttribute('aria-label', 'Toggle Dark Mode');
+  const isDark = localStorage.getItem('rrTheme') === 'dark';
+  btn.textContent = isDark ? '☀️' : '🌙';
+  btn.addEventListener('click', ()=>{
+    const next = document.body.classList.contains('dark-theme') ? 'light' : 'dark';
+    localStorage.setItem('rrTheme', next);
+    document.body.classList.toggle('dark-theme', next === 'dark');
+    btn.textContent = next === 'dark' ? '☀️' : '🌙';
+  });
+  const langToggle = qs('#langToggle');
+  if(langToggle && langToggle.nextSibling) {
+    area.insertBefore(btn, langToggle.nextSibling);
+  } else {
+    area.insertBefore(btn, area.firstChild);
+  }
+}
+function customConfirm(message){
+  return new Promise((resolve)=>{
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+    const modal = document.createElement('div');
+    modal.className = 'confirm-modal';
+    modal.innerHTML = `
+      <p>${tr(message)}</p>
+      <div class="confirm-actions">
+        <button class="btn-danger confirm-yes" type="button">${tr('Yes')}</button>
+        <button class="btn-outline confirm-no" type="button">${tr('No')}</button>
+      </div>
+    `;
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    setTimeout(() => overlay.classList.add('show'), 20);
+    const cleanUp = (result) => {
+      overlay.classList.remove('show');
+      setTimeout(() => { overlay.remove(); resolve(result); }, 250);
+    };
+    modal.querySelector('.confirm-yes').onclick = () => cleanUp(true);
+    modal.querySelector('.confirm-no').onclick = () => cleanUp(false);
+  });
+}
 function applyLanguage(){
   const lang=localStorage.getItem('rrLang') || 'en';
   document.documentElement.lang = lang;
   document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
   document.body.classList.toggle('rtl', lang === 'ar');
   const btn=qs('#langToggle'); if(btn) btn.textContent = lang === 'ar' ? 'English' : 'العربية';
+
   const pairs = {
     'a[data-page="home"]':'Home','a[data-page="rooms"]':'Explore Rooms','a[data-page="booking"]':'Booking','a[data-page="bookings"]':'My Bookings','a[data-page="profile"]':'Profile','a[data-page="admin"]':'Admin Dashboard','#signinLink':'Sign In','#logoutBtn':'Logout',
     '#authSubmit': qs('#authSubmit')?.textContent?.includes('Create') ? 'Create Account' : 'Login','#resetPasswordBtn':'Reset Password',
     '.booking-panel h2':'Booking Details'
   };
-  Object.entries(pairs).forEach(([sel,en])=>qsa(sel).forEach(el=>{ if(el && !el.dataset.lockedText) el.textContent=tr(en); }));
-  // Exact text replacements for headings, labels, options and small UI text.
+
+  // 1. Initialize dataset.enText for pairs to protect them from being overwritten with Arabic on first run
+  Object.entries(pairs).forEach(([sel,en])=>qsa(sel).forEach(el=>{
+    if(el && !el.dataset.enText) el.dataset.enText = en;
+  }));
+
+  // 2. Save original English text for all elements matching generic selectors
   qsa('h1,h2,h3,p,label,button,a,option,span,strong,small').forEach(el=>{
     if(el.children.length) return;
     const en = el.dataset.enText || el.textContent.trim();
     if(!el.dataset.enText) el.dataset.enText = en;
-    const translated = tr(en);
-    if(translated !== en || lang === 'en') el.textContent = lang === 'ar' ? translated : en;
   });
+
+  // Save placeholders
   qsa('input,textarea').forEach(input=>{
     const ph = input.dataset.enPlaceholder || input.getAttribute('placeholder') || '';
     if(!input.dataset.enPlaceholder) input.dataset.enPlaceholder = ph;
+  });
+
+  // 3. Apply translations for pairs using their stored dataset.enText
+  Object.entries(pairs).forEach(([sel,en])=>qsa(sel).forEach(el=>{
+    if(el && !el.dataset.lockedText) {
+      const originalEn = el.dataset.enText || en;
+      el.textContent = lang === 'ar' ? tr(originalEn) : originalEn;
+    }
+  }));
+
+  // 4. Apply translations for generic elements
+  qsa('h1,h2,h3,p,label,button,a,option,span,strong,small').forEach(el=>{
+    if(el.children.length) return;
+    const en = el.dataset.enText;
+    const translated = tr(en);
+    if(translated !== en || lang === 'en') el.textContent = lang === 'ar' ? translated : en;
+  });
+
+  // Apply placeholders
+  qsa('input,textarea').forEach(input=>{
+    const ph = input.dataset.enPlaceholder;
     const translated = tr(ph);
     input.setAttribute('placeholder', lang === 'ar' ? translated : ph);
   });
+
+  // 5. Translate Document Title
+  if (!document.documentElement.dataset.enTitle) {
+    document.documentElement.dataset.enTitle = document.title;
+  }
+  const enTitle = document.documentElement.dataset.enTitle;
+  const titleParts = enTitle.split('|').map(p => p.trim());
+  const translatedParts = titleParts.map(p => tr(p));
+  document.title = lang === 'ar' ? translatedParts.join(' | ') : enTitle;
 }
 function showLocalizedMessage(el, enMsg, type='info'){ showMessage(el, tr(enMsg), type); }
 
@@ -239,7 +360,7 @@ async function loadRooms(params=''){
   const data = await api(`/api/rooms${params ? '?' + params : ''}`); state.rooms = data.rooms || []; return state.rooms;
 }
 function setupRoomClicks(){ qsa('.select-room-btn').forEach(btn=>btn.addEventListener('click',()=>{
-  if(getUser()?.role === 'admin') { toast('Admin cannot create customer bookings. Use the Admin Dashboard to manage reservations.'); location.href='admin.html'; return; }
+  if(getUser()?.role === 'admin') { toast(tr('Admin cannot create customer bookings. Use the Admin Dashboard to manage reservations.')); location.href='admin.html'; return; }
   const id=btn.dataset.roomId;
   state.selectedRoomId=id; localStorage.setItem('selectedRoomId',id);
   if(page()==='booking'){ const sel=qs('#roomType'); if(sel) sel.value=id; qsa('.room-card').forEach(c=>c.classList.toggle('selected',c.dataset.roomId===id)); updateSummary(); qs('.booking-panel')?.scrollIntoView({behavior:'smooth',block:'center'}); } else { location.href=`booking.html?room=${encodeURIComponent(id)}`; }
@@ -387,10 +508,12 @@ function setupAuth(){
     qsa('.auth-tab').forEach(t=>t.classList.toggle('active',t.dataset.mode===m));
     nameGroup.style.display=m==='register'?'block':'none';
     submit.textContent=m==='login'?'Login':'Create Account';
+    submit.dataset.enText = m==='login'?'Login':'Create Account';
     if(resetBtn) resetBtn.style.display = m==='login' ? 'block' : 'none';
     msg.textContent='';
     msg.className='message';
     passwordInput.autocomplete = m==='login' ? 'current-password' : 'new-password';
+    applyLanguage();
   }
   qsa('.auth-tab').forEach(t=>t.addEventListener('click',()=>setMode(t.dataset.mode)));
   resetBtn?.addEventListener('click', async ()=>{
@@ -455,13 +578,13 @@ function setupAuth(){
   });
   setMode('login');
 }
-async function renderBookings(){ const root=qs('#myBookings'); if(!root) return; try{ const data=await api('/api/bookings'); const bookings=data.bookings||[]; root.innerHTML = bookings.map(b=>bookingCard(b,false)).join('') || '<div class="booking-card">No bookings yet.</div>'; qsa('.cancel-booking-btn').forEach(btn=>btn.addEventListener('click',async()=>{ if(!confirm('Cancel this booking?')) return; try{ await api(`/api/bookings/${encodeURIComponent(btn.dataset.id)}/cancel`,{method:'PATCH'}); toast('Booking cancelled.'); renderBookings(); }catch(err){ toast(err.message); } })); }catch(err){ root.innerHTML=`<div class="message error" style="display:block">${err.message}</div>`; } }
+async function renderBookings(){ const root=qs('#myBookings'); if(!root) return; try{ const data=await api('/api/bookings'); const bookings=data.bookings||[]; root.innerHTML = bookings.map(b=>bookingCard(b,false)).join('') || '<div class="booking-card">No bookings yet.</div>'; qsa('.cancel-booking-btn').forEach(btn=>btn.addEventListener('click',async()=>{ if(!await customConfirm('Cancel this booking?')) return; try{ await api(`/api/bookings/${encodeURIComponent(btn.dataset.id)}/cancel`,{method:'PATCH'}); toast(tr('Booking cancelled.')); renderBookings(); }catch(err){ toast(err.message); } })); }catch(err){ root.innerHTML=`<div class="message error" style="display:block">${err.message}</div>`; } }
 function bookingCard(b, admin=false){ const topDelete = admin ? `<button class="btn-danger delete-booking-btn delete-booking-top" type="button" data-id="${b.id}" data-ref="${b.reference}">${tr('Delete Booking')}</button>` : ''; return `<article class="booking-card admin-booking-card"><div class="booking-card-head"><div><span class="badge category">${tr('Reference')}</span><h2>${b.reference}</h2></div><div class="booking-head-actions"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${statusBadge(b.status)}${statusBadge(b.paymentStatus)}</div>${topDelete}</div></div><div class="info-grid">${admin?`<div class="info-item"><span>${tr('Customer')}</span><strong>${b.customerName}</strong></div><div class="info-item"><span>${tr('Email')}</span><strong>${b.customerEmail}</strong></div>`:''}<div class="info-item"><span>${tr('Guest')}</span><strong>${b.guestName}</strong></div><div class="info-item"><span>${tr('Phone')}</span><strong>${b.phone || '-'}</strong></div><div class="info-item"><span>${tr('Room')}</span><strong>${tRoom(b.roomName)}</strong></div><div class="info-item"><span>${tr('Stay')}</span><strong>${b.checkIn} → ${b.checkOut}</strong></div><div class="info-item"><span>${tr('Guests')}</span><strong>${b.guests}</strong></div><div class="info-item"><span>${tr('Nights')}</span><strong>${b.nights}</strong></div><div class="info-item"><span>${tr('Total')}</span><strong>${formatCurrency(b.total)}</strong></div><div class="info-item"><span>${tr('Payment')}</span><strong>${paymentLabel(b.paymentMethod)}${b.paymentCardLast4 ? ` · ${tr('Online card ending')} ${b.paymentCardLast4}` : ''}</strong></div><div class="info-item"><span>${tr('Created')}</span><strong>${new Date(b.createdAt).toLocaleString()}</strong></div></div>${admin?adminActions(b):userActions(b)}</article>`; }
 function userActions(b){ if(!['pending','confirmed'].includes(b.status)) return ''; return `<div class="admin-actions"><button class="btn-danger cancel-booking-btn" data-id="${b.id}" type="button">${tr('Cancel Booking')}</button></div>`; }
 function adminActions(b){ return `<div class="admin-actions admin-actions-visible"><select class="admin-status-select" data-id="${b.id}" data-current="${b.status}"><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="checked_in">Checked in</option><option value="checked_out">Checked out</option><option value="cancelled">Cancelled</option><option value="rejected">Rejected</option></select><select class="admin-payment-select" data-id="${b.id}" data-current="${b.paymentStatus}"><option value="pending">Payment pending</option><option value="paid">Paid</option><option value="refunded">Refunded</option><option value="failed">Payment failed</option></select><button class="btn-danger delete-booking-btn delete-booking-wide" type="button" data-id="${b.id}" data-ref="${b.reference}">${tr('Delete Booking')}</button></div>`; }
 async function renderAdmin(){ if(page()!=='admin') return; try{ const overview=await api('/api/admin/overview'); const s=overview.stats; qs('#adminStats').innerHTML = `<div class="admin-card"><span>${tr('Customers')}</span><strong>${s.users}</strong></div><div class="admin-card"><span>${tr('Bookings')}</span><strong>${s.bookings}</strong></div><div class="admin-card"><span>${tr('Active')}</span><strong>${s.activeBookings}</strong></div><div class="admin-card"><span>${tr('Revenue')}</span><strong>${formatCurrency(s.revenue)}</strong></div><div class="admin-card"><span>${tr('Rooms')}</span><strong>${s.rooms}</strong></div>`; await renderAdminBookings(); const users=await api('/api/admin/users'); qs('#adminUsers').innerHTML = users.users.map(u=>`<article class="booking-card user-card"><div class="info-grid"><div class="info-item"><span>Name</span><strong>${u.name}</strong></div><div class="info-item"><span>Email</span><strong>${u.email}</strong></div><div class="info-item"><span>Role</span><strong>${u.role}</strong></div><div class="info-item"><span>Bookings</span><strong>${u.bookings_count}</strong></div><div class="info-item"><span>Total</span><strong>${formatCurrency(u.total_spent)}</strong></div><div class="info-item"><span>Created</span><strong>${new Date(u.created_at).toLocaleString()}</strong></div></div>${u.role==='admin'?'':`<div class="admin-actions"><button class="btn-danger delete-user-btn" type="button" data-id="${u.id}" data-name="${u.name}">${tr('Delete User')}</button></div>`}</article>`).join('');
-      qsa('.delete-user-btn').forEach(btn=>btn.addEventListener('click',async()=>{ if(!confirm(tr('Delete this user and related bookings?'))) return; try{ await api(`/api/admin/users/${encodeURIComponent(btn.dataset.id)}`,{method:'DELETE'}); toast(tr('User deleted successfully.')); renderAdmin(); }catch(err){ toast(err.message); } })); qs('#exportCsvBtn').onclick=(e)=>{ e.preventDefault(); const token=getToken(); location.href=`/api/admin/export/bookings.csv?token=${encodeURIComponent(token)}`; alert('If export does not start, use API export after login from the same browser.'); }; }catch(err){ qs('#adminBookings').innerHTML=`<div class="message error" style="display:block">${err.message}</div>`; } }
-async function renderAdminBookings(){ const params=new URLSearchParams(); const q=qs('#adminQ')?.value||''; const status=qs('#adminStatus')?.value||'all'; const dateFrom=qs('#adminDateFrom')?.value||''; const dateTo=qs('#adminDateTo')?.value||''; if(q)params.set('q',q); if(status)params.set('status',status); if(dateFrom)params.set('dateFrom',dateFrom); if(dateTo)params.set('dateTo',dateTo); const data=await api(`/api/admin/bookings?${params}`); qs('#adminBookings').innerHTML = data.bookings.map(b=>bookingCard(b,true)).join('') || '<div class="booking-card">No bookings found.</div>'; qsa('.admin-status-select').forEach(sel=>{ const card=sel.closest('.booking-card'); sel.value = sel.dataset.current || 'pending'; sel.addEventListener('change',async()=>{ try{ await api(`/api/admin/bookings/${encodeURIComponent(sel.dataset.id)}/status`,{method:'PATCH',body:JSON.stringify({status:sel.value})}); toast('Status updated'); renderAdmin(); }catch(err){ toast(err.message); } }); }); qsa('.admin-payment-select').forEach(sel=>{ sel.value = sel.dataset.current || 'pending'; sel.addEventListener('change',async()=>{ try{ await api(`/api/admin/bookings/${encodeURIComponent(sel.dataset.id)}/payment`,{method:'PATCH',body:JSON.stringify({paymentStatus:sel.value})}); toast('Payment updated'); renderAdmin(); }catch(err){ toast(err.message); } }); }); qsa('.delete-booking-btn').forEach(btn=>btn.addEventListener('click',async()=>{ if(!confirm(tr('Delete this booking permanently?'))) return; try{ btn.disabled=true; await api(`/api/admin/bookings/${encodeURIComponent(btn.dataset.id)}`,{method:'DELETE'}); toast(tr('Booking deleted successfully.')); renderAdmin(); }catch(err){ btn.disabled=false; toast(err.message); } })); }
+      qsa('.delete-user-btn').forEach(btn=>btn.addEventListener('click',async()=>{ if(!await customConfirm('Delete this user and related bookings?')) return; try{ await api(`/api/admin/users/${encodeURIComponent(btn.dataset.id)}`,{method:'DELETE'}); toast(tr('User deleted successfully.')); renderAdmin(); }catch(err){ toast(err.message); } })); qs('#exportCsvBtn').onclick=(e)=>{ e.preventDefault(); const token=getToken(); location.href=`/api/admin/export/bookings.csv?token=${encodeURIComponent(token)}`; alert('If export does not start, use API export after login from the same browser.'); }; }catch(err){ qs('#adminBookings').innerHTML=`<div class="message error" style="display:block">${err.message}</div>`; } }
+async function renderAdminBookings(){ const params=new URLSearchParams(); const q=qs('#adminQ')?.value||''; const status=qs('#adminStatus')?.value||'all'; const dateFrom=qs('#adminDateFrom')?.value||''; const dateTo=qs('#adminDateTo')?.value||''; if(q)params.set('q',q); if(status)params.set('status',status); if(dateFrom)params.set('dateFrom',dateFrom); if(dateTo)params.set('dateTo',dateTo); const data=await api(`/api/admin/bookings?${params}`); qs('#adminBookings').innerHTML = data.bookings.map(b=>bookingCard(b,true)).join('') || '<div class="booking-card">No bookings found.</div>'; qsa('.admin-status-select').forEach(sel=>{ const card=sel.closest('.booking-card'); sel.value = sel.dataset.current || 'pending'; sel.addEventListener('change',async()=>{ try{ await api(`/api/admin/bookings/${encodeURIComponent(sel.dataset.id)}/status`,{method:'PATCH',body:JSON.stringify({status:sel.value})}); toast(tr('Status updated')); renderAdmin(); }catch(err){ toast(err.message); } }); }); qsa('.admin-payment-select').forEach(sel=>{ sel.value = sel.dataset.current || 'pending'; sel.addEventListener('change',async()=>{ try{ await api(`/api/admin/bookings/${encodeURIComponent(sel.dataset.id)}/payment`,{method:'PATCH',body:JSON.stringify({paymentStatus:sel.value})}); toast(tr('Payment updated')); renderAdmin(); }catch(err){ toast(err.message); } }); }); qsa('.delete-booking-btn').forEach(btn=>btn.addEventListener('click',async()=>{ if(!await customConfirm('Delete this booking permanently?')) return; try{ btn.disabled=true; await api(`/api/admin/bookings/${encodeURIComponent(btn.dataset.id)}`,{method:'DELETE'}); toast(tr('Booking deleted successfully.')); renderAdmin(); }catch(err){ btn.disabled=false; toast(err.message); } })); }
 function setupAdminFilters(){ qs('#adminFilters')?.addEventListener('submit',e=>{e.preventDefault(); renderAdminBookings();}); }
 async function setupProfile(){ if(page()!=='profile') return; const user=getUser(); if(user){ qs('#profileName').value=user.name; qs('#profileEmail').value=user.email; } qs('#profileForm')?.addEventListener('submit',async e=>{e.preventDefault(); try{ const data=await api('/api/profile',{method:'PUT',body:JSON.stringify({name:qs('#profileName').value})}); setSession(getToken(),data.user); updateAuthUI(); showMessage(qs('#profileMessage'),'Profile updated successfully.','success'); }catch(err){ showMessage(qs('#profileMessage'),err.message,'error'); }}); qs('#passwordForm')?.addEventListener('submit',async e=>{e.preventDefault(); try{ await api('/api/profile/password',{method:'PUT',body:JSON.stringify({currentPassword:qs('#currentPassword').value,newPassword:qs('#newPassword').value})}); showMessage(qs('#passwordMessage'),'Password updated successfully.','success'); e.target.reset(); }catch(err){ showMessage(qs('#passwordMessage'),err.message,'error'); }}); }
 async function init(){ await refreshSession(4); insertLangToggle(); setupPasswordToggles(); updateAuthUI(); enforceProtected(); setupProtectedLinks(); setupLogout(); setupDates(); setupPhoneValidation(); setupPaymentFields(); setupAuth(); setupForms(); setupAdminFilters(); applyBookingParams(); if(getUser() && qs('#guestName')) qs('#guestName').value=getUser().name; if(page()==='rooms') { await renderRoomsPage(); } if(page()==='booking') { await renderBookingRooms(); } if(page()==='bookings') await renderBookings(); if(page()==='admin') await renderAdmin(); if(page()==='profile') setupProfile(); applyLanguage(); }
