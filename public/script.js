@@ -438,7 +438,18 @@ function setupForms(){
   qs('#roomSearchForm')?.addEventListener('submit', e=>{e.preventDefault(); renderRoomsPage();});
   qs('#bookingSearchForm')?.addEventListener('submit', e=>{e.preventDefault(); renderBookingRooms();});
   qs('#clearBookingFilters')?.addEventListener('click',()=>{ ['bookingRoomQ','bookingFilterCheckIn','bookingFilterCheckOut'].forEach(id=>{ const el=qs('#'+id); if(el) el.value=''; }); const c=qs('#bookingCategory'); if(c) c.value='all'; const g=qs('#bookingFilterGuests'); if(g) g.value='2'; renderBookingRooms(); });
-  ['roomType','checkin','checkout','guestsCount'].forEach(id=>qs(`#${id}`)?.addEventListener('change', updateSummary));
+  ['roomType','checkin','checkout','guestsCount'].forEach(id=>qs(`#${id}`)?.addEventListener('change', (e)=>{
+    updateSummary();
+    if(page() === 'booking') {
+      if(id === 'checkin') {
+        const f = qs('#bookingFilterCheckIn');
+        if(f) { f.value = e.target.value; renderBookingRooms(); }
+      } else if(id === 'checkout') {
+        const f = qs('#bookingFilterCheckOut');
+        if(f) { f.value = e.target.value; renderBookingRooms(); }
+      }
+    }
+  }));
   qs('#bookingForm')?.addEventListener('submit', async e=>{
     e.preventDefault();
     const form = e.currentTarget;

@@ -12,77 +12,77 @@ let initPromise = null;
 const initialRooms = [
   {
     id: 'nile_deluxe', name: 'Nile View Deluxe Room', location: 'Cairo, Egypt', category: 'Deluxe',
-    capacity: 2, beds: '1 King Bed', size: '34 m²', price: 2800, discount: 15, inventory: 5, status: 'available',
+    capacity: 2, beds: '1 King Bed', size: '34 m²', price: 2800, discount: 15, inventory: 1, status: 'available',
     image: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80',
     amenities: ['Nile view', 'Smart lighting', 'Fast Wi-Fi', 'Breakfast included'],
     description: 'A calm deluxe room inspired by real Nile-side hotel rooms, with fixed room details and a smart control panel.'
   },
   {
     id: 'red_sea_suite', name: 'Red Sea Premium Suite', location: 'Hurghada, Egypt', category: 'Suite',
-    capacity: 3, beds: '1 King Bed + Sofa Bed', size: '48 m²', price: 4200, discount: 20, inventory: 3, status: 'available',
+    capacity: 3, beds: '1 King Bed + Sofa Bed', size: '48 m²', price: 4200, discount: 20, inventory: 1, status: 'available',
     image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=1200&q=80',
     amenities: ['Sea view', 'Private balcony', 'Mini bar', 'AI climate control'],
     description: 'A premium suite for a coastal stay with a balcony, warm interior design, and stable room specifications.'
   },
   {
     id: 'cairo_city', name: 'Cairo City Smart Room', location: 'Cairo, Egypt', category: 'Standard',
-    capacity: 2, beds: '2 Twin Beds', size: '28 m²', price: 1900, discount: 0, inventory: 8, status: 'available',
+    capacity: 2, beds: '2 Twin Beds', size: '28 m²', price: 1900, discount: 0, inventory: 1, status: 'available',
     image: 'https://images.unsplash.com/photo-1631049552057-403cdb8f0658?auto=format&fit=crop&w=1200&q=80',
     amenities: ['City view', 'Smart TV', 'Work desk', 'Soundproof windows'],
     description: 'A practical city room for short stays, business trips, and students presenting a clean booking demo.'
   },
   {
     id: 'alex_sea_view', name: 'Alexandria Sea View Room', location: 'Alexandria, Egypt', category: 'Sea View',
-    capacity: 2, beds: '1 Queen Bed', size: '32 m²', price: 2400, discount: 10, inventory: 4, status: 'available',
+    capacity: 2, beds: '1 Queen Bed', size: '32 m²', price: 2400, discount: 10, inventory: 1, status: 'available',
     image: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1200&q=80',
     amenities: ['Sea view', 'Queen bed', 'Room service', 'Smart curtains'],
     description: 'A realistic seaside room option with a simple fixed price, discount label, and clear facilities.'
   },
   {
     id: 'family_apartment', name: 'Family Smart Apartment', location: 'New Cairo, Egypt', category: 'Family',
-    capacity: 5, beds: '2 Bedrooms + Living Room', size: '72 m²', price: 5200, discount: 12, inventory: 2, status: 'available',
+    capacity: 5, beds: '2 Bedrooms + Living Room', size: '72 m²', price: 5200, discount: 12, inventory: 1, status: 'available',
     image: 'https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=1200&q=80',
     amenities: ['Kitchenette', 'Kids area', '2 bathrooms', 'Laundry corner'],
     description: 'A family-friendly apartment layout with enough space and fixed details for a realistic reservation flow.'
   },
   {
     id: 'hurghada_beach_suite', name: 'Hurghada Beach Suite', location: 'Hurghada, Egypt', category: 'Sea View',
-    capacity: 2, beds: '1 King Bed', size: '44 m²', price: 3600, discount: 18, inventory: 3, status: 'available',
+    capacity: 2, beds: '1 King Bed', size: '44 m²', price: 3600, discount: 18, inventory: 1, status: 'available',
     image: 'https://images.unsplash.com/photo-1602002418082-a4443e081dd1?auto=format&fit=crop&w=1200&q=80',
     amenities: ['Sea view', 'Smart lock', 'Lounge area', 'Breakfast included'],
     description: 'A sea-view suite designed for a luxury coastal hotel concept, combining relaxing beach views with smart access.'
   },
   {
     id: 'luxor_heritage_suite', name: 'Luxor Heritage Suite', location: 'Luxor, Egypt', category: 'Heritage',
-    capacity: 2, beds: '1 King Bed', size: '46 m²', price: 3600, discount: 18, inventory: 3, status: 'available',
+    capacity: 2, beds: '1 King Bed', size: '46 m²', price: 3600, discount: 18, inventory: 1, status: 'available',
     image: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?auto=format&fit=crop&w=1200&q=80',
     amenities: ['Heritage design', 'Smart lock', 'Lounge area', 'Breakfast included'],
     description: 'A heritage-style suite for a luxury Egypt hotel concept, combining classic design with smart access.'
   },
   {
     id: 'sharm_family_suite', name: 'Sharm Family Suite', location: 'Sharm El Sheikh, Egypt', category: 'Family',
-    capacity: 4, beds: '1 King Bed + 2 Twin Beds', size: '64 m²', price: 4800, discount: 14, inventory: 3, status: 'available',
+    capacity: 4, beds: '1 King Bed + 2 Twin Beds', size: '64 m²', price: 4800, discount: 14, inventory: 1, status: 'available',
     image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80',
     amenities: ['Family layout', 'Sea breeze', 'Kids corner', 'Breakfast included'],
     description: 'A comfortable family suite with enough space for parents and children, designed for longer beach stays.'
   },
   {
     id: 'giza_pyramid_view', name: 'Giza Pyramid View Room', location: 'Giza, Egypt', category: 'View',
-    capacity: 2, beds: '1 Queen Bed', size: '36 m²', price: 3100, discount: 10, inventory: 4, status: 'available',
+    capacity: 2, beds: '1 Queen Bed', size: '36 m²', price: 3100, discount: 10, inventory: 1, status: 'available',
     image: 'https://images.unsplash.com/photo-1572252009286-268acec5ca0a?auto=format&fit=crop&w=1200&q=80',
     amenities: ['Pyramid view', 'Smart TV', 'Work desk', 'Room service'],
     description: 'A city hotel room with a premium view concept, suitable for tourists and short business stays.'
   },
   {
     id: 'six_guest_grand_family', name: 'Grand Family Room for 6', location: 'North Coast, Egypt', category: 'Family',
-    capacity: 6, beds: '2 Queen Beds + 2 Single Beds', size: '88 m²', price: 6500, discount: 16, inventory: 2, status: 'available',
+    capacity: 6, beds: '2 Queen Beds + 2 Single Beds', size: '88 m²', price: 6500, discount: 16, inventory: 1, status: 'available',
     image: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=1200&q=80',
     amenities: ['Sleeps 6 guests', 'Large lounge', '2 bathrooms', 'Kitchenette'],
     description: 'A large family room built for groups up to six guests, with more space and practical sleeping arrangements.'
   },
   {
     id: 'business_king_room', name: 'Business King Room', location: 'New Administrative Capital, Egypt', category: 'Business',
-    capacity: 2, beds: '1 King Bed', size: '30 m²', price: 2600, discount: 8, inventory: 6, status: 'available',
+    capacity: 2, beds: '1 King Bed', size: '30 m²', price: 2600, discount: 8, inventory: 1, status: 'available',
     image: 'https://images.unsplash.com/photo-1595576508898-0ad5c879a061?auto=format&fit=crop&w=1200&q=80',
     amenities: ['Work desk', 'Fast Wi-Fi', 'Quiet floor', 'Coffee station'],
     description: 'A practical business room with a quiet layout, strong internet, and a simple professional stay experience.'
@@ -247,6 +247,7 @@ async function ensureDatabase() {
     for (const r of initialRooms) {
       await query(`INSERT INTO rooms (id,name,location,category,capacity,beds,size,price,discount,inventory,status,image,amenities,description,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) ON CONFLICT (id) DO NOTHING`, [r.id,r.name,r.location,r.category,r.capacity,r.beds,r.size,r.price,r.discount,r.inventory,r.status,r.image,JSON.stringify(r.amenities),r.description,nowIso(),nowIso()]);
     }
+    await query(`UPDATE rooms SET inventory = 1`);
     await query(`UPDATE rooms SET status='available', updated_at=$1 WHERE status='maintenance'`, [nowIso()]);
     const admin = (await query('SELECT * FROM users WHERE email=$1', [ADMIN_EMAIL]))[0];
     if (!admin) {
@@ -296,7 +297,11 @@ async function getRoomsWithAvailability(url) {
   if (category && category !== 'all') rooms = rooms.filter(r => r.category.toLowerCase().includes(category));
   if (guests) rooms = rooms.filter(r => Number(r.capacity) >= guests);
   if (maxPrice) rooms = rooms.filter(r => Number(r.finalPrice) <= maxPrice);
-  return Promise.all(rooms.map(async room => ({ ...room, availableUnits: checkIn && checkOut ? await availableUnits(room, checkIn, checkOut) : (room.status === 'available' ? room.inventory : 0) })));
+  const result = await Promise.all(rooms.map(async room => ({ ...room, availableUnits: checkIn && checkOut ? await availableUnits(room, checkIn, checkOut) : (room.status === 'available' ? room.inventory : 0) })));
+  if (checkIn && checkOut) {
+    return result.filter(r => r.availableUnits > 0);
+  }
+  return result;
 }
 async function findExistingActiveBooking(userId, roomId, checkIn, checkOut) {
   const activeStatuses = ['pending','confirmed','checked_in'];

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Code – Room Reserve</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif;
+      background: #080f1a;
+      background-image:
+        radial-gradient(ellipse at 20% 20%, rgba(197,168,128,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(30,60,110,0.3) 0%, transparent 50%);
+      padding: 40px 20px;
+    }
+
+    .page-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    /* ── luxury card ── */
+    .card {
+      position: relative;
+      width: 420px;
+      background: linear-gradient(145deg, #0d1b2e 0%, #0f2040 50%, #0a1520 100%);
+      border: 1px solid rgba(197,168,128,0.35);
+      border-radius: 28px;
+      padding: 40px 36px 36px;
+      box-shadow:
+        0 0 0 1px rgba(197,168,128,0.1),
+        0 8px 40px rgba(0,0,0,0.8),
+        0 0 80px rgba(197,168,128,0.06),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+      text-align: center;
+      overflow: hidden;
+    }
+
+    /* shimmer border */
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 28px;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(197,168,128,0.7), transparent 40%, rgba(197,168,128,0.4));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* decorative corner ornaments */
+    .corner { position: absolute; width: 28px; height: 28px; }
+    .corner::before, .corner::after {
+      content: '';
+      position: absolute;
+      background: #c5a880;
+      border-radius: 2px;
+    }
+    .corner::before { width: 100%; height: 2px; top: 0; left: 0; }
+    .corner::after  { width: 2px; height: 100%; top: 0; left: 0; }
+    .corner.tl { top: 18px; left: 18px; }
+    .corner.tr { top: 18px; right: 18px; transform: scaleX(-1); }
+    .corner.bl { bottom: 18px; left: 18px; transform: scaleY(-1); }
+    .corner.br { bottom: 18px; right: 18px; transform: scale(-1); }
+
+    /* logo area */
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 28px;
+    }
+    .brand-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #c5a880, #e8d5a3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      box-shadow: 0 4px 20px rgba(197,168,128,0.4);
+      margin-bottom: 4px;
+    }
+    .brand-name {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .brand-sub {
+      font-size: 11px;
+      color: #c5a880;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+
+    /* divider */
+    .divider {
+      width: 80%;
+      height: 1px;
+      margin: 0 auto 28px;
+      background: linear-gradient(90deg, transparent, rgba(197,168,128,0.5), transparent);
+    }
+
+    /* QR wrapper */
+    .qr-wrapper {
+      position: relative;
+      display: inline-block;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(197,168,128,0.12), rgba(197,168,128,0.04));
+      border: 1px solid rgba(197,168,128,0.25);
+      border-radius: 20px;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+
+    #qr-canvas {
+      display: block;
+      border-radius: 10px;
+    }
+
+    /* logo overlay on QR */
+    .qr-logo-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      background: #fff;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+      border: 2px solid rgba(197,168,128,0.5);
+    }
+
+    /* scan label */
+    .scan-label {
+      margin-top: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .scan-label h2 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #c5a880;
+    }
+    .scan-label p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 0.5px;
+    }
+    .scan-label .url {
+      margin-top: 6px;
+      font-size: 11px;
+      color: rgba(197,168,128,0.6);
+      letter-spacing: 0.5px;
+    }
+
+    /* download button */
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 36px;
+      background: linear-gradient(135deg, #c5a880, #e8d5a3, #c5a880);
+      background-size: 200% auto;
+      color: #0a1520;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 1px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 4px 24px rgba(197,168,128,0.4);
+      transition: background-position 0.4s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      animation: fadeUp 0.8s ease 0.5s both;
+    }
+    .btn-download:hover {
+      background-position: right center;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(197,168,128,0.55);
+    }
+
+    /* animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(197,168,128,0.3); }
+      50%       { box-shadow: 0 0 40px rgba(197,168,128,0.6); }
+    }
+
+    .card { animation: fadeUp 0.7s ease both; }
+    .qr-wrapper { animation: glow 3s ease-in-out infinite; }
+
+    /* print style */
+    @media print {
+      body { background: white; }
+      .btn-download { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+  <!-- CARD -->
+  <div class="card">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+
+    <div class="brand">
+      <div class="brand-icon">🏨</div>
+      <div class="brand-name">Room Reserve</div>
+      <div class="brand-sub">Book Your Perfect Stay</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="qr-wrapper">
+      <div id="qr-canvas"></div>
+      <div class="qr-logo-overlay">🏨</div>
+    </div>
+
+    <div class="scan-label">
+      <h2>Scan to Visit</h2>
+      <p>احجز غرفتك الآن بسهولة وسرعة</p>
+      <div class="url">room-reserve-final-new.vercel.app</div>
+    </div>
+  </div>
+
+  <!-- DOWNLOAD BUTTON -->
+  <a id="download-btn" class="btn-download" href="#" download="RoomReserve-QR.png">
+    ⬇️ تحميل الـ QR Code
+  </a>
+</div>
+
+<script>
+  const TARGET_URL = 'https://room-reserve-final-new.vercel.app/';
+  const SIZE = 260;
+
+  // Generate real QR code
+  new QRCode(document.getElementById('qr-canvas'), {
+    text: TARGET_URL,
+    width: SIZE,
+    height: SIZE,
+    colorDark: '#0d1b2e',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H   // High correction = logo can cover 30%
+  });
+
+  // After QR renders, set up download
+  setTimeout(() => {
+    const qrCanvas = document.querySelector('#qr-canvas canvas');
+    if (!qrCanvas) return;
+
+    // Create composite canvas: QR + logo overlay
+    const composite = document.createElement('canvas');
+    const padding = 60;
+    const cardW = SIZE + padding * 2;
+    const cardH = SIZE + padding * 2 + 80;
+    composite.width = cardW;
+    composite.height = cardH;
+    const ctx = composite.getContext('2d');
+
+    // Background
+    const bg = ctx.createLinearGradient(0, 0, cardW, cardH);
+    bg.addColorStop(0, '#0d1b2e');
+    bg.addColorStop(0.5, '#0f2040');
+    bg.addColorStop(1, '#0a1520');
+    ctx.fillStyle = bg;
+    roundRect(ctx, 0, 0, cardW, cardH, 20);
+    ctx.fill();
+
+    // Gold border
+    ctx.strokeStyle = 'rgba(197,168,128,0.5)';
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, 1, 1, cardW - 2, cardH - 2, 20);
+    ctx.stroke();
+
+    // Draw QR
+    ctx.drawImage(qrCanvas, padding, padding, SIZE, SIZE);
+
+    // Logo circle overlay
+    const cx = padding + SIZE / 2;
+    const cy = padding + SIZE / 2;
+    const logoR = 32;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(cx, cy, logoR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(197,168,128,0.7)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.font = `${logoR}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🏨', cx, cy);
+
+    // "Room Reserve" text
+    ctx.fillStyle = '#c5a880';
+    ctx.font = 'bold 18px "Plus Jakarta Sans", Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('ROOM RESERVE', cardW / 2, SIZE + padding + 28);
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.font = '13px "Cairo", Arial';
+    ctx.fillText('room-reserve-final-new.vercel.app', cardW / 2, SIZE + padding + 52);
+
+    // Set download
+    document.getElementById('download-btn').href = composite.toDataURL('image/png');
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+  }, 600);
+</script>
+</body>
+</html>
